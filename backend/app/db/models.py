@@ -18,6 +18,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     Uuid,
+    extract,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -145,31 +146,31 @@ class MerchantRule(TimestampMixin, Base):
 
 class MonthlyBudget(TimestampMixin, Base):
     __tablename__ = "monthly_budgets"
-    __table_args__ = (
-        UniqueConstraint("month", "category_id", name="uq_budget_month_category"),
-        CheckConstraint("limit_amount >= 0", name="ck_budget_limit_nonnegative"),
-        CheckConstraint("EXTRACT(DAY FROM month) = 1", name="ck_budget_month_first_day"),
-    )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     month: Mapped[date] = mapped_column(Date)
     category_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("categories.id"))
     limit_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))
+    __table_args__ = (
+        UniqueConstraint("month", "category_id", name="uq_budget_month_category"),
+        CheckConstraint(limit_amount >= 0, name="ck_budget_limit_nonnegative"),
+        CheckConstraint(extract("day", month) == 1, name="ck_budget_month_first_day"),
+    )
 
     category: Mapped[Category] = relationship(back_populates="budgets")
 
 
 class MonthlyIncome(TimestampMixin, Base):
     __tablename__ = "monthly_income"
-    __table_args__ = (
-        CheckConstraint("amount >= 0", name="ck_income_nonnegative"),
-        CheckConstraint("EXTRACT(DAY FROM month) = 1", name="ck_income_month_first_day"),
-    )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     month: Mapped[date] = mapped_column(Date, index=True)
     description: Mapped[str] = mapped_column(String(160))
     amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))
+    __table_args__ = (
+        CheckConstraint(amount >= 0, name="ck_income_nonnegative"),
+        CheckConstraint(extract("day", month) == 1, name="ck_income_month_first_day"),
+    )
 
 
 class LoanTerms(TimestampMixin, Base):

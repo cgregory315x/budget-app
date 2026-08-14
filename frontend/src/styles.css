@@ -407,8 +407,126 @@ h2 {
 
 .category-panel,
 .account-panel,
-.transaction-panel {
+.transaction-panel,
+.planning-panel {
   margin-top: 18px;
+}
+
+.month-picker {
+  display: grid;
+  gap: 4px;
+  color: #71807c;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.month-picker input {
+  padding: 8px 10px;
+  border: 1px solid #d6d2c8;
+  border-radius: 8px;
+  color: #314944;
+  background: #fff;
+  font: inherit;
+}
+
+.planning-error,
+.planning-loading {
+  margin: 20px 25px 0;
+}
+
+.planning-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 25px;
+}
+
+.planning-grid > article + article {
+  padding-left: 32px;
+  border-left: 1px solid #ebe7dd;
+}
+
+.planning-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.planning-section-heading h3 {
+  margin: 0;
+  color: #314944;
+  font-size: 1rem;
+}
+
+.planning-section-heading > strong {
+  color: #397568;
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.planning-form {
+  display: grid;
+  grid-template-columns: minmax(130px, 1.4fr) minmax(90px, 0.8fr) auto auto;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.planning-form input,
+.planning-form select {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #d6d2c8;
+  border-radius: 8px;
+  color: #314944;
+  background: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.planning-form .secondary-button {
+  padding: 8px 11px;
+}
+
+.planning-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.planning-list li {
+  display: grid;
+  grid-template-columns: auto minmax(100px, 1fr) auto auto auto;
+  gap: 9px;
+  align-items: center;
+  padding: 11px 3px;
+  border-bottom: 1px solid #ebe7dd;
+}
+
+.planning-list i {
+  width: 9px;
+  height: 28px;
+  border-radius: 4px;
+}
+
+.planning-list strong {
+  overflow: hidden;
+  color: #314944;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planning-list span {
+  color: #52655f;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.income-list li {
+  grid-template-columns: minmax(100px, 1fr) auto auto auto;
 }
 
 .transaction-panel {
@@ -805,6 +923,16 @@ a:focus-visible {
     border-right: 0;
     border-bottom: 1px solid #ebe7dd;
   }
+
+  .planning-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .planning-grid > article + article {
+    padding: 28px 0 0;
+    border-top: 1px solid #ebe7dd;
+    border-left: 0;
+  }
 }
 
 @media (max-width: 720px) {
@@ -897,6 +1025,23 @@ a:focus-visible {
 
   .transaction-filters {
     grid-template-columns: 1fr;
+  }
+
+  .planning-panel .category-heading {
+    align-items: flex-start;
+  }
+
+  .planning-grid {
+    gap: 22px;
+  }
+
+  .planning-form {
+    grid-template-columns: 1fr auto;
+  }
+
+  .planning-form input:first-child,
+  .planning-form select:first-child {
+    grid-column: 1 / -1;
   }
 
   .transaction-list li {

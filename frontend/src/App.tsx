@@ -2,23 +2,10 @@ import { useEffect, useState } from 'react'
 
 import { AccountManager } from './features/accounts/AccountManager'
 import { CategoryManager } from './features/categories/CategoryManager'
+import { MonthlyPlanManager } from './features/planning/MonthlyPlanManager'
 import { TransactionManager } from './features/transactions/TransactionManager'
 
 type ApiState = 'checking' | 'online' | 'offline'
-
-type CategoryProgress = {
-  name: string
-  spent: number
-  limit: number
-  color: string
-}
-
-const categoryProgress: CategoryProgress[] = [
-  { name: 'Housing', spent: 1680, limit: 1900, color: '#397d72' },
-  { name: 'Food', spent: 482, limit: 650, color: '#d18a48' },
-  { name: 'Transportation', spent: 238, limit: 400, color: '#6783ba' },
-  { name: 'Personal', spent: 184, limit: 300, color: '#a66c9b' },
-]
 
 const currency = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -118,38 +105,6 @@ function App() {
         </section>
 
         <section className="dashboard-grid">
-          <article id="budgets" className="panel budget-panel">
-            <div className="panel-heading">
-              <div>
-                <p className="eyebrow">Category limits</p>
-                <h2>Budget progress</h2>
-              </div>
-              <button className="text-button" type="button">View all</button>
-            </div>
-
-            <div className="progress-list">
-              {categoryProgress.map((category) => {
-                const percentage = Math.min((category.spent / category.limit) * 100, 100)
-                return (
-                  <div className="progress-item" key={category.name}>
-                    <div className="progress-label">
-                      <span>{category.name}</span>
-                      <span>
-                        <strong>{currency.format(category.spent)}</strong> / {currency.format(category.limit)}
-                      </span>
-                    </div>
-                    <div className="progress-track">
-                      <span
-                        className="progress-fill"
-                        style={{ width: `${percentage}%`, backgroundColor: category.color }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </article>
-
           <article className="panel composition-panel">
             <div className="panel-heading">
               <div>
@@ -170,6 +125,7 @@ function App() {
 
         </section>
 
+        <MonthlyPlanManager />
         <TransactionManager />
         <AccountManager />
         <CategoryManager />

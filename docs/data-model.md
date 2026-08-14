@@ -26,6 +26,8 @@ Deleting an account also archives it rather than removing it. This preserves its
 - Store interest rates as integer basis points or a fixed-precision decimal, never floating point.
 - Store a logical month as the first calendar day of that month and enforce that invariant in both API validation and the database.
 
+Monthly budgets apply only to active expense categories, with at most one limit per category and month. Monthly income is stored as one or more positive entries so separate expected income sources remain visible while still supporting a monthly total.
+
 ## Duplicate detection
 
 Each confirmed transaction receives a deterministic fingerprint derived from the account, posted date, normalized description, amount, and a stable occurrence index. Statement imports also store a SHA-256 file hash. Neither mechanism should silently discard a candidate; possible duplicates must appear in the review flow.

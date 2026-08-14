@@ -6,7 +6,7 @@ The initial supported statement format is selectable-text Navy Federal Credit Un
 
 ## Current status
 
-The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent account, category, and manually entered transaction management are available through the API and dashboard; monthly budgeting and the PDF import workflow are still in development.
+The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, and expected income are available through the API and dashboard; the real monthly summary and PDF import workflow are still in development.
 
 ## Stack
 
