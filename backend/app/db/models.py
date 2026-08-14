@@ -118,6 +118,7 @@ class Transaction(TimestampMixin, Base):
     merchant_normalized: Mapped[str | None] = mapped_column(String(200))
     amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))
     fingerprint: Mapped[str] = mapped_column(String(64))
+    occurrence_index: Mapped[int] = mapped_column(Integer, default=1)
     excluded_from_budget: Mapped[bool] = mapped_column(Boolean, default=False)
     categorization_confidence: Mapped[Decimal | None] = mapped_column(Numeric(4, 3))
 

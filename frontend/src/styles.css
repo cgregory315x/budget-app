@@ -406,8 +406,158 @@ h2 {
 }
 
 .category-panel,
-.account-panel {
+.account-panel,
+.transaction-panel {
   margin-top: 18px;
+}
+
+.transaction-panel {
+  padding: 0;
+}
+
+.transaction-panel > .category-heading {
+  padding: 25px;
+}
+
+.transaction-filters {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.4fr) repeat(2, minmax(130px, 1fr)) repeat(2, minmax(125px, 0.8fr)) auto auto;
+  gap: 9px;
+  padding: 16px 25px;
+  border-bottom: 1px solid #ebe7dd;
+  background: #faf8f2;
+}
+
+.transaction-filters input,
+.transaction-filters select {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #d6d2c8;
+  border-radius: 8px;
+  color: #314944;
+  background: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.transaction-filters .secondary-button {
+  padding: 8px 11px;
+}
+
+.transaction-layout {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.58fr) minmax(520px, 1.42fr);
+  gap: 28px;
+  padding: 25px;
+}
+
+.transaction-form {
+  padding-right: 25px;
+  border-right: 1px solid #ebe7dd;
+}
+
+.form-hint {
+  margin: 0;
+  padding: 10px;
+  border-radius: 8px;
+  color: #7c776d;
+  background: #fbf5e8;
+  font-size: 0.78rem;
+}
+
+.checkbox-label {
+  display: flex !important;
+  grid-template-columns: auto 1fr;
+  flex-direction: row;
+  gap: 8px !important;
+  align-items: center;
+}
+
+.checkbox-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: #397568;
+}
+
+.transaction-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transaction-list li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 82px minmax(150px, 1.3fr) minmax(110px, 0.9fr) auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 4px;
+  border-bottom: 1px solid #ebe7dd;
+}
+
+.transaction-date,
+.transaction-category,
+.transaction-description span {
+  color: #7b8985;
+  font-size: 0.72rem;
+}
+
+.transaction-description {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.transaction-description strong {
+  overflow: hidden;
+  color: #314944;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transaction-category {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.transaction-category i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.amount-out,
+.amount-in {
+  font-size: 0.83rem;
+  white-space: nowrap;
+}
+
+.amount-out {
+  color: #873f35;
+}
+
+.amount-in {
+  color: #397d62;
+}
+
+.delete-button {
+  padding: 5px;
+  border: 0;
+  color: #9a5e50;
+  background: transparent;
+  font-weight: 700;
+}
+
+.excluded-badge {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  color: #8c5d25;
+  font-size: 0.62rem;
+  font-weight: 700;
 }
 
 .category-heading {
@@ -641,6 +791,20 @@ a:focus-visible {
   .summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .transaction-filters {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .transaction-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-form {
+    padding: 0 0 25px;
+    border-right: 0;
+    border-bottom: 1px solid #ebe7dd;
+  }
 }
 
 @media (max-width: 720px) {
@@ -681,6 +845,29 @@ a:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .transaction-filters {
+    grid-template-columns: repeat(2, 1fr);
+    padding-inline: 18px;
+  }
+
+  .transaction-layout {
+    padding: 18px;
+  }
+
+  .transaction-list li {
+    grid-template-columns: 76px minmax(120px, 1fr) auto;
+  }
+
+  .transaction-category {
+    grid-column: 2;
+  }
+
+  .transaction-list .amount-out,
+  .transaction-list .amount-in {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
   .review-panel {
     grid-template-columns: auto 1fr;
   }
@@ -706,6 +893,28 @@ a:focus-visible {
 
   .category-list li {
     grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .transaction-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-list li {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .transaction-date {
+    grid-column: 1 / -1;
+  }
+
+  .transaction-category {
+    grid-column: 1;
+  }
+
+  .transaction-list .amount-out,
+  .transaction-list .amount-in {
+    grid-column: 2 / -1;
+    grid-row: 2;
   }
 
   .account-list li {

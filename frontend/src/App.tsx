@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { AccountManager } from './features/accounts/AccountManager'
 import { CategoryManager } from './features/categories/CategoryManager'
+import { TransactionManager } from './features/transactions/TransactionManager'
 
 type ApiState = 'checking' | 'online' | 'offline'
 
@@ -167,17 +168,9 @@ function App() {
             <p className="sample-note">Sample data · Connect the API to replace</p>
           </article>
 
-          <article id="transactions" className="panel review-panel">
-            <div className="review-icon" aria-hidden="true">?</div>
-            <div>
-              <p className="eyebrow">Human in the loop</p>
-              <h2>Seven transactions need a category</h2>
-              <p>Review AI suggestions and teach the app how to handle similar merchants next time.</p>
-            </div>
-            <button className="secondary-button" type="button">Review transactions</button>
-          </article>
         </section>
 
+        <TransactionManager />
         <AccountManager />
         <CategoryManager />
       </main>

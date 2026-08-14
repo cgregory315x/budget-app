@@ -30,6 +30,8 @@ Deleting an account also archives it rather than removing it. This preserves its
 
 Each confirmed transaction receives a deterministic fingerprint derived from the account, posted date, normalized description, amount, and a stable occurrence index. Statement imports also store a SHA-256 file hash. Neither mechanism should silently discard a candidate; possible duplicates must appear in the review flow.
 
+Manual transactions allocate the lowest available positive occurrence index among otherwise identical transactions. Editing fingerprint inputs recalculates the fingerprint and occurrence index. Manual deletion removes the confirmed transaction, while deleting accounts and categories continues to mean archival.
+
 ## Import lifecycle
 
 `UPLOADED -> PARSED -> NEEDS_REVIEW -> CONFIRMED`

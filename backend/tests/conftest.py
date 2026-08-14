@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.db.base import Base
-from app.db.models import Account, Category
+from app.db.models import Account, Category, Transaction
 
 
 @pytest.fixture
@@ -19,7 +19,11 @@ def db_session() -> Generator[Session]:
     )
     Base.metadata.create_all(
         engine,
-        tables=[cast(Table, Account.__table__), cast(Table, Category.__table__)],
+        tables=[
+            cast(Table, Account.__table__),
+            cast(Table, Category.__table__),
+            cast(Table, Transaction.__table__),
+        ],
     )
     test_session = sessionmaker[Session](
         bind=engine, autoflush=False, expire_on_commit=False
