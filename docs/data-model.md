@@ -16,6 +16,8 @@
 
 Category names are unique without regard to letter case, while preserving the user's display spelling. Deleting a category archives it rather than removing it, so transactions, budgets, and merchant rules retain their historical relationship.
 
+Deleting an account also archives it rather than removing it. This preserves its future transaction, statement-import, and loan history. A current balance is optional because an account may be created before a statement or manual balance is available.
+
 ## Money conventions
 
 - Persist money as fixed-precision numeric values with two fractional digits for USD-facing fields.

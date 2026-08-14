@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { AccountManager } from './features/accounts/AccountManager'
 import { CategoryManager } from './features/categories/CategoryManager'
 
 type ApiState = 'checking' | 'online' | 'offline'
@@ -177,6 +178,7 @@ function App() {
           </article>
         </section>
 
+        <AccountManager />
         <CategoryManager />
       </main>
     </div>
