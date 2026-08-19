@@ -26,18 +26,16 @@
 - [Complete] Statement and transaction duplicate detection.
 - [Complete] Explicit selection and atomic import confirmation.
 
-## Milestone 3: Assisted categorization
+## Milestone 3: Deterministic categorization — Complete
 
 - [Complete] Initial deterministic merchant normalization and matching slice.
 - [Complete] Merchant-rule management and explicit match preview/apply review.
 - [Complete] Explainable precedence, conflict visibility, and existing-category protection.
-- External AI provider gateway for unresolved transactions.
 - [Complete] Deterministic approval, correction, and exact-rule learning flow.
 - [Complete] Transaction categorization provenance for manual and merchant-rule assignments.
 - [Complete] Rule re-enabling and explainable conflict review.
 - [Complete] Scalable match review filters with stable corrections and selection.
 - [Complete] Deterministic end-to-end, privacy, adversarial-description, and regex-safety tests.
-- Provider-boundary privacy and prompt-injection tests alongside the future AI gateway.
 
 ## Milestone 4: Reporting polish
 

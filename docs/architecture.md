@@ -13,7 +13,6 @@ FastAPI JSON API
     |-- statement import pipeline
     |      |-- Navy Federal adapter
     |      `-- future adapters
-    |-- external AI categorization gateway
     `-- SQLAlchemy repositories
             |
         PostgreSQL
@@ -50,7 +49,7 @@ The first adapter targets selectable-text Navy Federal checking statements. Raw 
 
 ## Categorization order
 
-The current Milestone 3 slice is local and deterministic:
+Milestone 3 categorization is local and deterministic:
 
 1. Only enabled rules whose target category is active are considered.
 2. Only transactions with no category are eligible.
@@ -74,8 +73,8 @@ The current Milestone 3 slice is local and deterministic:
     category, and corrected-only filters never alter matching or discard hidden decisions. Bulk
     selection applies only to visible rows while the interface retains the total selected count.
 
-There is no history-based, AI, or autonomous fallback in this slice. A later Milestone 3 slice may
-add suggestions for unresolved items, but they must remain behind explicit user approval.
+There is no history-based, probabilistic, external-provider, or autonomous fallback. Transactions
+without a deterministic match remain uncategorized until the user assigns a category or adds a rule.
 
 ## Security boundary
 
@@ -86,9 +85,8 @@ add suggestions for unresolved items, but they must remain behind explicit user 
 - Merchant matching runs inside the application and database. It makes no external request and
   does not log transaction descriptions, normalized merchant values, statement text, sensitive
   account metadata, rule patterns, or preview payloads.
-- No AI provider, credentials, prompt construction, or provider logging exists in this slice.
 - Adversarial transaction descriptions are treated only as data. Integration tests cover
-  prompt-like text, control characters, unusual Unicode, bounded normalization, regex complexity,
+  instruction-like text, control characters, unusual Unicode, bounded normalization, regex complexity,
   and the absence of descriptions or sensitive account labels from application logs.
 
 ## Future deployment

@@ -17,12 +17,11 @@ Budget App helps one person turn financial statements into an accurate monthly v
 2. The app extracts candidate transactions into a temporary import.
 3. The app flags low-confidence or incomplete rows.
 4. The user reviews and corrects the import.
-5. Existing merchant rules categorize known transactions.
-6. An external AI service suggests categories for unfamiliar transactions.
-7. The user approves or corrects suggestions.
-8. Corrections may become reusable merchant rules.
-9. Confirmed transactions are saved and the original PDF is deleted.
-10. The dashboard updates monthly spending, income, and budget progress.
+5. Confirmed transactions are saved and the original PDF is deleted.
+6. Deterministic merchant rules propose categories for matching transactions.
+7. The user previews, approves, excludes, or corrects each proposed category.
+8. Corrections may become reusable exact merchant rules.
+9. The dashboard updates monthly spending, income, and budget progress.
 
 ## MVP capabilities
 
@@ -32,13 +31,13 @@ Budget App helps one person turn financial statements into an accurate monthly v
 - Import Navy Federal checking transactions from a statement PDF.
 - Add, edit, split, and delete transactions manually.
 - Detect likely duplicate imports and transactions.
-- Preserve the original description as normalized text, not the PDF itself.
+- Preserve the original transaction description alongside a separate normalized merchant value.
 
 ### Categorization
 
 - Maintain user-defined spending categories.
-- Suggest categories for unfamiliar transactions through an external AI API.
-- Require user approval before an AI suggestion becomes authoritative.
+- Propose categories through deterministic, explainable merchant rules.
+- Require explicit user approval before a rule match changes a transaction.
 - Learn deterministic merchant rules from accepted or corrected categorizations.
 - Allow rules to be reviewed, edited, disabled, and deleted.
 
@@ -72,8 +71,7 @@ Budget App helps one person turn financial statements into an accurate monthly v
 
 - Do not retain a successfully imported PDF.
 - Use temporary files with bounded lifetime and cleanup after failure or cancellation.
-- Never send account numbers, names, addresses, or full statement text to an AI provider.
-- Prefer normalized merchant descriptors and limited transaction context for AI categorization.
+- Keep statement text, transaction descriptions, and account metadata inside the application.
 - Never log raw PDF content or secrets.
 - Make uncertain parsing visible; do not silently infer financial amounts.
 
@@ -81,6 +79,7 @@ Budget App helps one person turn financial statements into an accurate monthly v
 
 - Supporting every institution immediately.
 - Fully autonomous categorization.
+- External categorization or machine-learning providers.
 - Direct movement of money.
 - Financial, tax, or investment advice.
 - Multi-user households.

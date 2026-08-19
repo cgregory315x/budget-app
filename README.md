@@ -6,7 +6,7 @@ The initial supported statement formats are selectable-text Navy Federal Credit 
 
 ## Current status
 
-The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard. Milestone 2 is complete: selectable-text Navy Federal checking and credit-card statements can be safely previewed, reviewed, checked for duplicates, and explicitly confirmed through an atomic import workflow. Milestone 3 has begun with local deterministic merchant rules and an explicit match preview/apply workflow; no external AI provider is connected.
+The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard. Milestone 2 is complete: selectable-text Navy Federal checking and credit-card statements can be safely previewed, reviewed, checked for duplicates, and explicitly confirmed through an atomic import workflow. Milestone 3 is complete with local deterministic merchant rules, explainable precedence, explicit preview/correction/apply review, rule learning, and categorization provenance.
 
 ## Statement import API
 
@@ -14,7 +14,7 @@ The repository contains the product plan, a migrated domain schema, a FastAPI se
 
 The upload limit can be changed with `STATEMENT_UPLOAD_MAX_BYTES`. Uploaded PDFs are held only in a temporary file and that file is deleted after every success or failure. Recognized Navy Federal statements return their statement period, masked account hint, editable candidate transactions, confidence, and row-level warnings. Preview also flags an exact PDF hash already present in statement-import history and marks exact or possible candidate transaction matches using occurrence-aware fingerprints. If extraction succeeds but the transaction layout is not recognized, the API still returns the extracted-text preview with a parser warning and no candidates.
 
-`POST /api/v1/imports/confirm` accepts the reviewed statement metadata and selected candidate rows. It revalidates the active account and adapter, rejects statement replays and unapproved exact transaction duplicates, and atomically creates the confirmed `StatementImport` and its transactions. Exact duplicates are excluded by default in the UI and require explicit selection. Confirmation does not categorize transactions; assisted categorization remains Milestone 3 work.
+`POST /api/v1/imports/confirm` accepts the reviewed statement metadata and selected candidate rows. It revalidates the active account and adapter, rejects statement replays and unapproved exact transaction duplicates, and atomically creates the confirmed `StatementImport` and its transactions. Exact duplicates are excluded by default in the UI and require explicit selection. Confirmation does not categorize transactions; deterministic categorization remains a separate, explicitly reviewed workflow.
 
 ## Stack
 
@@ -72,3 +72,4 @@ Run backend validation with `pytest`, `ruff check app tests`, and `mypy app test
 - [Architecture](docs/architecture.md)
 - [Data model](docs/data-model.md)
 - [Roadmap](docs/roadmap.md)
+- [Milestone 4 session handoff](docs/milestone-4-handoff.md)
