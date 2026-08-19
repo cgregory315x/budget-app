@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { MonthlySummary, getMonthlySummary } from '../../api/monthlySummary'
+import {
+  MonthlySummary,
+  MonthlyTrends,
+  getMonthlySummary,
+  getMonthlyTrends,
+} from '../../api/monthlySummary'
 import { onDataChanged } from '../../dataEvents'
 
 function currentMonth() {
@@ -26,22 +31,38 @@ function monthName(value: string) {
   )
 }
 
+function shortMonthName(value: string) {
+  const [year, month] = value.slice(0, 7).split('-').map(Number)
+  return new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
+    new Date(year, month - 1, 1),
+  )
+}
+
 export function MonthlySummaryDashboard() {
   const [month, setMonth] = useState(currentMonth())
   const [summary, setSummary] = useState<MonthlySummary | null>(null)
+  const [trends, setTrends] = useState<MonthlyTrends | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadSummary = useCallback(async (selectedMonth: string) => {
+  const loadReporting = useCallback(async (selectedMonth: string) => {
     setError(null)
-    setSummary(await getMonthlySummary(selectedMonth))
+    const [nextSummary, nextTrends] = await Promise.all([
+      getMonthlySummary(selectedMonth),
+      getMonthlyTrends(selectedMonth),
+    ])
+    setSummary(nextSummary)
+    setTrends(nextTrends)
   }, [])
 
   useEffect(() => {
     let active = true
-    getMonthlySummary(month)
-      .then((result) => {
-        if (active) setSummary(result)
+    Promise.all([getMonthlySummary(month), getMonthlyTrends(month)])
+      .then(([nextSummary, nextTrends]) => {
+        if (active) {
+          setSummary(nextSummary)
+          setTrends(nextTrends)
+        }
       })
       .catch((reason: unknown) => {
         if (active) setError(reason instanceof Error ? reason.message : 'Summary unavailable.')
@@ -57,12 +78,12 @@ export function MonthlySummaryDashboard() {
   useEffect(() => onDataChanged((scopes) => {
     if (!scopes.includes('summary')) return
     setLoading(true)
-    void loadSummary(month)
+    void loadReporting(month)
       .catch((reason: unknown) => {
         setError(reason instanceof Error ? reason.message : 'Summary unavailable.')
       })
       .finally(() => setLoading(false))
-  }), [loadSummary, month])
+  }), [loadReporting, month])
 
   const compositionBackground = useMemo(() => {
     if (!summary || Number(summary.total_spending) <= 0) return '#edeae2'
@@ -75,10 +96,18 @@ export function MonthlySummaryDashboard() {
     return `conic-gradient(${stops.join(', ')})`
   }, [summary])
 
+  const trendMaximum = useMemo(() => Math.max(
+    1,
+    ...(trends?.months.flatMap((point) => [
+      Number(point.actual_inflows),
+      Number(point.total_spending),
+    ]) ?? []),
+  ), [trends])
+
   if (loading) {
     return <section id="overview" className="panel summary-state">Loading monthly summary…</section>
   }
-  if (error || !summary) {
+  if (error || !summary || !trends) {
     return <section id="overview" className="form-error summary-state" role="alert">{error ?? 'Summary unavailable.'}</section>
   }
 
@@ -212,6 +241,63 @@ export function MonthlySummaryDashboard() {
           )}
         </article>
       </div>
+
+
+      <article className="panel trend-panel" aria-labelledby="trend-title">
+        <div className="panel-heading trend-heading">
+          <div>
+            <p className="eyebrow">Six-month view</p>
+            <h2 id="trend-title">Income versus spending</h2>
+          </div>
+          <ul className="trend-legend" aria-label="Chart legend">
+            <li><i className="income-key" />Recorded income</li>
+            <li><i className="spending-key" />Spending</li>
+          </ul>
+        </div>
+        <figure className="trend-figure">
+          <div className="trend-chart" aria-hidden="true">
+            {trends.months.map((point) => (
+              <div className="trend-month" key={point.month}>
+                <div className="trend-bars">
+                  <i
+                    className="trend-bar income-bar"
+                    style={{ height: `${(Number(point.actual_inflows) / trendMaximum) * 100}%` }}
+                  />
+                  <i
+                    className="trend-bar spending-bar"
+                    style={{ height: `${(Number(point.total_spending) / trendMaximum) * 100}%` }}
+                  />
+                </div>
+                <span>{shortMonthName(point.month)}</span>
+              </div>
+            ))}
+          </div>
+          <figcaption>Recorded income and budget-counted spending by month.</figcaption>
+        </figure>
+        <div className="trend-table-wrap">
+          <table className="trend-table">
+            <caption>Exact monthly trend values</caption>
+            <thead>
+              <tr>
+                <th scope="col">Month</th>
+                <th scope="col">Expected income</th>
+                <th scope="col">Recorded income</th>
+                <th scope="col">Spending</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trends.months.map((point) => (
+                <tr key={point.month}>
+                  <th scope="row">{monthName(point.month.slice(0, 7))}</th>
+                  <td>{money(point.planned_income)}</td>
+                  <td>{money(point.actual_inflows)}</td>
+                  <td>{money(point.total_spending)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </article>
     </section>
   )
 }

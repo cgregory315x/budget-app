@@ -727,6 +727,131 @@ h2 {
   color: #52655f;
 }
 
+.trend-panel {
+  min-width: 0;
+}
+
+.trend-heading {
+  gap: 20px;
+}
+
+.trend-legend {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  color: #61716c;
+  font-size: 0.75rem;
+  list-style: none;
+}
+
+.trend-legend li {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.trend-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.income-key,
+.income-bar {
+  background: #397d72;
+}
+
+.spending-key,
+.spending-bar {
+  background: repeating-linear-gradient(135deg, #c8783d 0 4px, #dd9a67 4px 8px);
+}
+
+.trend-figure {
+  margin: 28px 0 20px;
+}
+
+.trend-chart {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(42px, 1fr));
+  gap: 20px;
+  height: 220px;
+  padding: 12px 16px 0;
+  border-bottom: 1px solid #d9d6cd;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 54px,
+    #eeebe4 54px 55px
+  );
+}
+
+.trend-month {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+  min-width: 0;
+  color: #71807c;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.trend-bars {
+  display: flex;
+  gap: 5px;
+  align-items: end;
+  justify-content: center;
+  min-height: 0;
+}
+
+.trend-bar {
+  width: min(24px, 38%);
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+}
+
+.trend-figure figcaption {
+  margin-top: 16px;
+  color: #71807c;
+  font-size: 0.75rem;
+}
+
+.trend-table-wrap {
+  overflow-x: auto;
+}
+
+.trend-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #52615d;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.trend-table caption {
+  margin-bottom: 8px;
+  color: #71807c;
+  font-weight: 700;
+  text-align: left;
+}
+
+.trend-table th,
+.trend-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #ebe7dd;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.trend-table th:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.trend-table thead th {
+  color: #71807c;
+  font-size: 0.7rem;
+}
+
 .sample-note {
   margin: 0;
   text-align: center;
@@ -1419,6 +1544,25 @@ a:focus-visible {
 
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .trend-heading,
+  .trend-legend {
+    align-items: flex-start;
+  }
+
+  .trend-heading {
+    flex-direction: column;
+  }
+
+  .trend-legend {
+    flex-wrap: wrap;
+  }
+
+  .trend-chart {
+    gap: 8px;
+    height: 180px;
+    padding-inline: 4px;
   }
 
   .category-list li {

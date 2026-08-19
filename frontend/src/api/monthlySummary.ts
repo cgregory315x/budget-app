@@ -30,8 +30,27 @@ export type MonthlySummary = {
   budget_progress: BudgetProgressSummary[]
 }
 
+export type MonthlyTrendPoint = {
+  month: string
+  planned_income: string
+  actual_inflows: string
+  total_spending: string
+}
+
+export type MonthlyTrends = {
+  start_month: string
+  end_month: string
+  months: MonthlyTrendPoint[]
+}
+
 export async function getMonthlySummary(month: string): Promise<MonthlySummary> {
   const response = await fetch(`/api/v1/summary?month=${month}-01`)
   if (!response.ok) throw new Error('The monthly summary could not be loaded.')
   return (await response.json()) as MonthlySummary
+}
+
+export async function getMonthlyTrends(month: string, months = 6): Promise<MonthlyTrends> {
+  const response = await fetch(`/api/v1/summary/trends?end_month=${month}-01&months=${months}`)
+  if (!response.ok) throw new Error('Monthly trends could not be loaded.')
+  return (await response.json()) as MonthlyTrends
 }
