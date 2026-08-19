@@ -9,6 +9,7 @@ import {
   listAccounts,
   updateAccount,
 } from '../../api/accounts'
+import { emitDataChanged } from '../../dataEvents'
 
 const initialInput: AccountInput = {
   name: '',
@@ -81,6 +82,7 @@ export function AccountManager() {
         ),
       )
       resetForm()
+      emitDataChanged('accounts')
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The account could not be saved.')
     } finally {
@@ -107,6 +109,7 @@ export function AccountManager() {
       await archiveAccount(account.id)
       setAccounts((current) => current.filter((item) => item.id !== account.id))
       if (editingId === account.id) resetForm()
+      emitDataChanged('accounts')
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The account could not be archived.')
     }

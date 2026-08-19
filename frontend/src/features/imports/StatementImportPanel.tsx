@@ -1,7 +1,13 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useState } from 'react'
 
 import { Account, listAccounts } from '../../api/accounts'
-import { CandidateTransactionPreview, StatementImportPreview, previewStatement } from '../../api/imports'
+import {
+  CandidateTransactionPreview,
+  StatementImportPreview,
+  confirmStatementImport,
+  previewStatement,
+} from '../../api/imports'
+import { emitDataChanged, onDataChanged } from '../../dataEvents'
 
 function displayPeriod(preview: StatementImportPreview) {
   const { period_start: start, period_end: end } = preview.parsed_statement
@@ -14,9 +20,23 @@ export function StatementImportPanel() {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<StatementImportPreview | null>(null)
   const [candidates, setCandidates] = useState<CandidateTransactionPreview[]>([])
+  const [selected, setSelected] = useState<boolean[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  const loadSupportedAccounts = useCallback(async () => {
+    const result = await listAccounts()
+    const supported = result.filter((account) =>
+      account.account_type === 'checking' || account.account_type === 'credit_card',
+    )
+    setAccounts(supported)
+    setAccountId((current) =>
+      supported.some((account) => account.id === current) ? current : supported[0]?.id ?? '',
+    )
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -40,20 +60,63 @@ export function StatementImportPanel() {
     }
   }, [])
 
+  useEffect(() => onDataChanged((scopes) => {
+    if (!scopes.includes('accounts')) return
+    void loadSupportedAccounts().catch((reason: unknown) => {
+      setError(reason instanceof Error ? reason.message : 'Accounts could not be loaded.')
+    })
+  }), [loadSupportedAccounts])
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!file || !accountId) return
     setUploading(true)
     setError(null)
+    setSuccess(null)
     setPreview(null)
     try {
       const result = await previewStatement(accountId, file)
       setPreview(result)
       setCandidates(result.parsed_statement.transactions)
+      setSelected(result.parsed_statement.transactions.map((row) => row.duplicate_status !== 'exact'))
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The statement could not be previewed.')
     } finally {
       setUploading(false)
+    }
+  }
+
+  async function confirmImport() {
+    if (!preview) return
+    const approved = candidates.filter((_, index) => selected[index])
+    if (approved.length === 0) return
+    setConfirming(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const result = await confirmStatementImport({
+        account_id: preview.account_id,
+        adapter: preview.adapter,
+        file_sha256: preview.statement.file_sha256,
+        statement_start: preview.parsed_statement.period_start,
+        statement_end: preview.parsed_statement.period_end,
+        warnings: preview.parsed_statement.warnings,
+        candidates: approved.map((candidate) => ({
+          posted_date: candidate.posted_date,
+          description: candidate.description,
+          amount: candidate.amount,
+          confidence: candidate.confidence,
+          allow_duplicate: candidate.duplicate_status === 'exact',
+        })),
+      })
+      setSuccess(
+        `Imported ${result.transaction_count} transaction${result.transaction_count === 1 ? '' : 's'}.`,
+      )
+      emitDataChanged('transactions', 'summary')
+    } catch (reason: unknown) {
+      setError(reason instanceof Error ? reason.message : 'The statement could not be imported.')
+    } finally {
+      setConfirming(false)
     }
   }
 
@@ -119,6 +182,11 @@ export function StatementImportPanel() {
               <span>Account {preview.parsed_statement.account_hint}</span>
             )}
           </div>
+          {preview.statement.duplicate.is_duplicate && (
+            <p className="duplicate-alert" role="status">
+              This exact PDF matches a previously imported statement. Review candidates before continuing.
+            </p>
+          )}
           {preview.parsed_statement.warnings.length > 0 && (
             <ul className="import-warnings" aria-label="Statement warnings">
               {preview.parsed_statement.warnings.map((warning) => <li key={warning}>{warning}</li>)}
@@ -131,11 +199,21 @@ export function StatementImportPanel() {
               </p>
             ) : <table className="candidate-table">
               <thead>
-                <tr><th>Date</th><th>Description</th><th>Amount</th><th>Review</th></tr>
+                <tr><th>Import</th><th>Date</th><th>Description</th><th>Amount</th><th>Review</th></tr>
               </thead>
               <tbody>
                 {candidates.map((candidate, index) => (
                   <tr key={`${candidate.source_text}-${index}`}>
+                    <td>
+                      <input
+                        aria-label={`Import transaction ${index + 1}`}
+                        type="checkbox"
+                        checked={selected[index] ?? false}
+                        onChange={(event) => setSelected((current) => current.map(
+                          (value, candidateIndex) => candidateIndex === index ? event.target.checked : value,
+                        ))}
+                      />
+                    </td>
                     <td>
                       <input
                         aria-label={`Transaction ${index + 1} date`}
@@ -173,7 +251,23 @@ export function StatementImportPanel() {
             <summary>View extracted statement text</summary>
             <pre>{preview.extracted_text}</pre>
           </details>
-          <p className="preview-note">Preview only — no transactions were created.</p>
+          <div className="confirm-actions">
+            <button
+              className="primary-button"
+              type="button"
+              disabled={
+                confirming || success !== null || preview.statement.duplicate.is_duplicate
+                || !selected.some(Boolean)
+              }
+              onClick={confirmImport}
+            >
+              {confirming ? 'Importing…' : 'Confirm selected transactions'}
+            </button>
+            <p className="preview-note">
+              {selected.filter(Boolean).length} of {candidates.length} transactions selected.
+            </p>
+          </div>
+          {success && <p className="import-success" role="status">{success}</p>}
         </div>
       )}
     </section>

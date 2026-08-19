@@ -7,7 +7,14 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.db.base import Base
-from app.db.models import Account, Category, MonthlyBudget, MonthlyIncome, Transaction
+from app.db.models import (
+    Account,
+    Category,
+    MonthlyBudget,
+    MonthlyIncome,
+    StatementImport,
+    Transaction,
+)
 
 
 @pytest.fixture
@@ -22,6 +29,7 @@ def db_session() -> Generator[Session]:
         tables=[
             cast(Table, Account.__table__),
             cast(Table, Category.__table__),
+            cast(Table, StatementImport.__table__),
             cast(Table, Transaction.__table__),
             cast(Table, MonthlyBudget.__table__),
             cast(Table, MonthlyIncome.__table__),

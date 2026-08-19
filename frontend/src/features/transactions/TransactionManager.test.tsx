@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { emitDataChanged } from '../../dataEvents'
 import { TransactionManager } from './TransactionManager'
 
 const account = {
@@ -128,5 +129,17 @@ describe('TransactionManager', () => {
       `/api/v1/transactions/${transaction.id}`,
       { method: 'DELETE' },
     )
+  })
+
+  it('reloads the ledger when imported transactions change', async () => {
+    const fetchMock = initialFetch().mockResolvedValueOnce(jsonResponse([transaction]))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<TransactionManager />)
+
+    await screen.findByText(/No transactions match/)
+    emitDataChanged('transactions')
+
+    expect(await screen.findByText('Example Market')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(4)
   })
 })

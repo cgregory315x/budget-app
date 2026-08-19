@@ -6,7 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db_session
 from app.imports.types import UnsupportedStatementError
-from app.schemas.imports import StatementImportPreview
+from app.schemas.imports import (
+    StatementImportConfirm,
+    StatementImportConfirmResponse,
+    StatementImportPreview,
+)
 from app.services import statement_imports
 
 router = APIRouter()
@@ -32,6 +36,25 @@ async def preview(
         statement_imports.InvalidPdfError,
         statement_imports.EmptyStatementTextError,
         UnsupportedStatementError,
+    ) as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)
+        ) from error
+
+
+@router.post("/confirm", response_model=StatementImportConfirmResponse)
+def confirm(
+    data: StatementImportConfirm, session: SessionDependency
+) -> StatementImportConfirmResponse:
+    try:
+        return statement_imports.confirm_statement_import(session, data)
+    except statement_imports.AccountNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except statement_imports.ImportConfirmationConflictError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except (
+        statement_imports.IneligibleAccountError,
+        statement_imports.ImportConfirmationError,
     ) as error:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)

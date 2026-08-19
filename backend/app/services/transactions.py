@@ -111,7 +111,7 @@ def _next_occurrence(
     return occurrence
 
 
-def _fingerprint(
+def build_fingerprint(
     account_id: uuid.UUID,
     posted_date: date,
     merchant_normalized: str,
@@ -142,7 +142,7 @@ def _set_fingerprint(session: Session, transaction: Transaction) -> None:
     )
     transaction.merchant_normalized = merchant
     transaction.occurrence_index = occurrence
-    transaction.fingerprint = _fingerprint(
+    transaction.fingerprint = build_fingerprint(
         transaction.account_id,
         transaction.posted_date,
         merchant,

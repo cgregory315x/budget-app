@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { emitDataChanged } from '../../dataEvents'
 import { MonthlySummaryDashboard } from './MonthlySummaryDashboard'
 
 const summary = {
@@ -95,5 +96,23 @@ describe('MonthlySummaryDashboard', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'The monthly summary could not be loaded.',
     )
+  })
+
+  it('reloads after transaction data changes', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse(summary))
+      .mockResolvedValueOnce(jsonResponse({
+        ...summary,
+        available_after_spending: '1800.00',
+        total_spending: '200.00',
+      }))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<MonthlySummaryDashboard />)
+
+    await screen.findByText('$1,890.00')
+    emitDataChanged('summary')
+
+    expect(await screen.findByText('$1,800.00')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 })

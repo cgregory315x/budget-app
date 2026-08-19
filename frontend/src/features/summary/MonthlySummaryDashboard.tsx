@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { MonthlySummary, getMonthlySummary } from '../../api/monthlySummary'
+import { onDataChanged } from '../../dataEvents'
 
 function currentMonth() {
   const current = new Date()
@@ -31,6 +32,11 @@ export function MonthlySummaryDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const loadSummary = useCallback(async (selectedMonth: string) => {
+    setError(null)
+    setSummary(await getMonthlySummary(selectedMonth))
+  }, [])
+
   useEffect(() => {
     let active = true
     getMonthlySummary(month)
@@ -47,6 +53,16 @@ export function MonthlySummaryDashboard() {
       active = false
     }
   }, [month])
+
+  useEffect(() => onDataChanged((scopes) => {
+    if (!scopes.includes('summary')) return
+    setLoading(true)
+    void loadSummary(month)
+      .catch((reason: unknown) => {
+        setError(reason instanceof Error ? reason.message : 'Summary unavailable.')
+      })
+      .finally(() => setLoading(false))
+  }), [loadSummary, month])
 
   const compositionBackground = useMemo(() => {
     if (!summary || Number(summary.total_spending) <= 0) return '#edeae2'

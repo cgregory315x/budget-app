@@ -23,7 +23,8 @@
 - [Started] Selectable-text Navy Federal credit-card adapter.
 - [Started] Parser fixtures made from synthetic/redacted samples.
 - [Started] Import preview with row-level warnings and editing.
-- Statement and transaction duplicate detection.
+- [Started] Statement and transaction duplicate detection.
+- [Started] Explicit selection and atomic import confirmation.
 
 ## Milestone 3: Assisted categorization
 

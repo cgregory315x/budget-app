@@ -11,6 +11,7 @@ import {
   listTransactions,
   updateTransaction,
 } from '../../api/transactions'
+import { emitDataChanged, onDataChanged } from '../../dataEvents'
 
 function today() {
   const current = new Date()
@@ -99,6 +100,25 @@ export function TransactionManager() {
     }
   }, [loadTransactions])
 
+  useEffect(() => onDataChanged((scopes) => {
+    if (scopes.includes('accounts')) {
+      void listAccounts().then((result) => {
+        setAccounts(result)
+        setInput((current) => ({
+          ...current,
+          account_id: result.some((account) => account.id === current.account_id)
+            ? current.account_id
+            : result[0]?.id ?? '',
+        }))
+      }).catch(() => setError('Accounts could not be loaded.'))
+    }
+    if (scopes.includes('transactions')) {
+      void loadTransactions(filters)
+        .then(setTransactions)
+        .catch(() => setError('Transactions could not be loaded.'))
+    }
+  }), [filters, loadTransactions])
+
   function resetForm() {
     setInput({ ...initialInput, account_id: accounts[0]?.id || '' })
     setEditingId(null)
@@ -125,6 +145,7 @@ export function TransactionManager() {
       else await createTransaction(input)
       resetForm()
       await refresh()
+      emitDataChanged('summary')
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The transaction could not be saved.')
     } finally {
@@ -152,6 +173,7 @@ export function TransactionManager() {
       await deleteTransaction(transaction.id)
       if (editingId === transaction.id) resetForm()
       await refresh()
+      emitDataChanged('summary')
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The transaction could not be deleted.')
     }

@@ -25,6 +25,8 @@ FastAPI JSON API
 - Feature-oriented modules will be introduced as behavior grows: dashboard, imports, transactions, budgets, and debt.
 - The client consumes versioned JSON endpoints under `/api/v1`.
 - The import preview keeps uncertain parsing visible and editable before confirmation.
+- Confirmation revalidates the account and adapter, then creates the statement import and
+  approved transactions atomically. Categorization remains a separate later workflow.
 
 ## Backend
 
