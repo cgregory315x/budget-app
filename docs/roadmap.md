@@ -17,14 +17,14 @@
 
 ## Milestone 2: Navy Federal import
 
-- [Started] Temporary PDF upload with limits and cleanup.
-- [Started] Text extraction preview and adapter identification boundary.
-- [Started] Selectable-text Navy Federal checking adapter.
-- [Started] Selectable-text Navy Federal credit-card adapter.
-- [Started] Parser fixtures made from synthetic/redacted samples.
-- [Started] Import preview with row-level warnings and editing.
-- [Started] Statement and transaction duplicate detection.
-- [Started] Explicit selection and atomic import confirmation.
+- [Complete] Temporary PDF upload with limits and cleanup.
+- [Complete] Text extraction preview and adapter identification boundary.
+- [Complete] Selectable-text Navy Federal checking adapter.
+- [Complete] Selectable-text Navy Federal credit-card adapter.
+- [Complete] Parser fixtures made from synthetic/redacted samples.
+- [Complete] Import preview with row-level warnings and editing.
+- [Complete] Statement and transaction duplicate detection.
+- [Complete] Explicit selection and atomic import confirmation.
 
 ## Milestone 3: Assisted categorization
 

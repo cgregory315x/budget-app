@@ -87,3 +87,54 @@ Trans Date Post Date Reference No. Description Amount
 01/02/26 01/03/26 123456789012 SYNTHETIC PURCHASE $10.00"""
 
     assert NavyFederalCheckingAdapter().can_parse(text) is False
+
+
+def test_parses_real_checking_ledger_layout_without_savings_rows() -> None:
+    parsed = NavyFederalCheckingAdapter().parse(
+        """Navy Federal
+Statement Period
+08/01/26 - 08/31/26
+Checking
+EveryDay Checking - 0000001234
+Date Transact ion Detail Amount($) Balance($)
+08-01 Beginning Balance 1,000.00
+08-02 Debit Card Synthetic Market 45.67- 954.33
+08-03 Dividend 1.25 955.58
+08-31 Ending Balance 955.58
+Savings
+Membership Savings - 0000005678
+Date Transaction Detail Amount($) Balance($)
+08-04 Transfer From Checking 100.00 1,100.00
+08-31 Ending Balance 1,100.00"""
+    )
+
+    assert parsed.account_hint == "…1234"
+    assert parsed.period_start == date(2026, 8, 1)
+    assert parsed.period_end == date(2026, 8, 31)
+    assert [(row.posted_date, row.description, row.amount) for row in parsed.transactions] == [
+        (date(2026, 8, 2), "Debit Card Synthetic Market", Decimal("-45.67")),
+        (date(2026, 8, 3), "Dividend", Decimal("1.25")),
+    ]
+    assert parsed.warnings == ()
+
+
+def test_warns_when_multiple_checking_sections_have_transactions() -> None:
+    parsed = NavyFederalCheckingAdapter().parse(
+        """Navy Federal
+Statement Period 08/01/26 - 08/31/26
+Checking
+EveryDay Checking - 0000001234
+Date Transaction Detail Amount($) Balance($)
+08-02 Synthetic Purchase 10.00- 90.00
+08-31 Ending Balance 90.00
+EveryDay Checking - 0000005678
+Date Transaction Detail Amount($) Balance($)
+08-03 Synthetic Deposit 20.00 120.00
+08-31 Ending Balance 120.00"""
+    )
+
+    assert parsed.account_hint is None
+    assert len(parsed.transactions) == 2
+    assert parsed.warnings == (
+        "Transactions from multiple checking account sections require review",
+    )
