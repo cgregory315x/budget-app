@@ -1,5 +1,14 @@
 # Roadmap
 
+## Current status
+
+Development is intentionally stopping at Milestone 4. The application currently covers the
+budgeting, statement-import, categorization, and reporting workflows needed for its present use.
+Debt planning is not part of the product scope.
+
+There is no committed next milestone. Future development will focus on small quality-of-life,
+maintenance, accessibility, and reliability improvements as real needs emerge.
+
 ## Milestone 0: Foundation
 
 - React/TypeScript and FastAPI applications.
@@ -45,17 +54,18 @@
 - [Complete] Protected portfolio demo-data workflow containing no real financial information.
 - [Complete] Backend reporting and frontend component/accessibility coverage.
 
-## Milestone 5: Debt planning — Dropped
+## Future quality-of-life work — As needed
 
-- Debt planning was intentionally removed from product scope after initial development.
-- No loan-management, amortization, or payoff-scenario API or interface is shipped.
-- Dormant loan tables from the initial migration remain for migration-history stability and are
-  not exposed by the application.
+- Address usability friction discovered through normal use.
+- Refine responsive behavior, accessibility, and keyboard workflows.
+- Improve reporting or import ergonomics when a concrete need is identified.
+- Keep dependencies, tests, documentation, and local-development tooling healthy.
+- Consider larger integrations or deployment work only if priorities change.
 
-## Milestone 6: Expansion
+## Intentionally out of scope
 
-- Additional credit-card statement adapters.
-- Additional institutions.
-- Hosted deployment and authentication decision.
-- Bank synchronization provider evaluation.
-- Mobile client or progressive web application improvements.
+- Debt and loan planning, including amortization and payoff scenarios.
+- Speculative integrations or expansion without a demonstrated need.
+
+The initial migration still contains dormant loan-related tables. They are not exposed by the
+application and remain only to preserve migration history.
