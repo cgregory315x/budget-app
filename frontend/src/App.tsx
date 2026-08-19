@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { AccountManager } from './features/accounts/AccountManager'
 import { CategoryManager } from './features/categories/CategoryManager'
 import { MerchantRuleManager } from './features/categorization/MerchantRuleManager'
+import { DebtPlanner } from './features/debt/DebtPlanner'
 import { StatementImportPanel } from './features/imports/StatementImportPanel'
 import { MonthlyPlanManager } from './features/planning/MonthlyPlanManager'
 import { MonthlySummaryDashboard } from './features/summary/MonthlySummaryDashboard'
@@ -88,6 +89,7 @@ function App() {
         <TransactionManager />
         <MerchantRuleManager />
         <AccountManager />
+        <DebtPlanner />
         <CategoryManager />
       </main>
     </div>
