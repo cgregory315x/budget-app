@@ -2,7 +2,7 @@
 
 ## Product statement
 
-Budget App helps one person turn financial statements into an accurate monthly view of spending, category budgets, income, and eventually debt-payoff options. It prioritizes user review over opaque automation.
+Budget App helps one person turn financial statements into an accurate monthly view of spending, category budgets, and income. It prioritizes user review over opaque automation.
 
 ## Initial user
 
@@ -27,7 +27,7 @@ Budget App helps one person turn financial statements into an accurate monthly v
 
 ### Accounts and transactions
 
-- Create checking, credit-card, and loan accounts.
+- Create checking and credit-card accounts.
 - Import Navy Federal checking transactions from a statement PDF.
 - Add, edit, split, and delete transactions manually.
 - Detect likely duplicate imports and transactions.
@@ -60,9 +60,6 @@ Budget App helps one person turn financial statements into an accurate monthly v
 ## Later milestones
 
 - Additional credit-card and institution statement adapters beyond Navy Federal.
-- Loan payment and balance history.
-- Interest and payoff projections.
-- Snowball, avalanche, and custom debt-payoff scenarios.
 - Bank synchronization.
 - Authentication, encryption/key management, and hosted deployment.
 - Responsive mobile experience or native mobile client.

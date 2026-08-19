@@ -21,7 +21,8 @@ FastAPI JSON API
 ## Frontend
 
 - React with TypeScript and Vite.
-- Feature-oriented modules will be introduced as behavior grows: dashboard, imports, transactions, budgets, and debt.
+- Feature-oriented modules separate dashboard, imports, transactions, budgets, accounts,
+  categories, and merchant-rule behavior.
 - The client consumes versioned JSON endpoints under `/api/v1`.
 - The import preview keeps uncertain parsing visible and editable before confirmation.
 - Confirmation revalidates the account and adapter, then creates the statement import and

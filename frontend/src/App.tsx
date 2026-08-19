@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { AccountManager } from './features/accounts/AccountManager'
 import { CategoryManager } from './features/categories/CategoryManager'
 import { MerchantRuleManager } from './features/categorization/MerchantRuleManager'
-import { DebtPlanner } from './features/debt/DebtPlanner'
 import { StatementImportPanel } from './features/imports/StatementImportPanel'
 import { MonthlyPlanManager } from './features/planning/MonthlyPlanManager'
 import { MonthlySummaryDashboard } from './features/summary/MonthlySummaryDashboard'
@@ -57,9 +56,6 @@ function App() {
           <a className="nav-item" href="#accounts">
             <span aria-hidden="true">▤</span> Accounts
           </a>
-          <a className="nav-item" href="#debt">
-            <span aria-hidden="true">⌁</span> Debt plan
-          </a>
         </nav>
 
         <div className="sidebar-footer">
@@ -89,7 +85,6 @@ function App() {
         <TransactionManager />
         <MerchantRuleManager />
         <AccountManager />
-        <DebtPlanner />
         <CategoryManager />
       </main>
     </div>

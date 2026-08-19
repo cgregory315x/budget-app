@@ -45,12 +45,12 @@
 - [Complete] Protected portfolio demo-data workflow containing no real financial information.
 - [Complete] Backend reporting and frontend component/accessibility coverage.
 
-## Milestone 5: Debt planning
+## Milestone 5: Debt planning — Dropped
 
-- Loan terms and balance history.
-- Amortization calculator with tested decimal math.
-- Snowball, avalanche, and custom payoff scenarios.
-- Scenario comparisons with assumptions made explicit.
+- Debt planning was intentionally removed from product scope after initial development.
+- No loan-management, amortization, or payoff-scenario API or interface is shipped.
+- Dormant loan tables from the initial migration remain for migration-history stability and are
+  not exposed by the application.
 
 ## Milestone 6: Expansion
 

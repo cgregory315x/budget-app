@@ -11,12 +11,16 @@
 | MerchantRule | Deterministic categorization learned from review | normalized pattern, match type, category, priority, enabled |
 | MonthlyBudget | Category limit for a calendar month | month, category, limit amount |
 | MonthlyIncome | Expected or actual income for a month | month, amount, description |
-| LoanTerms | Inputs used for projections | account, principal, annual rate, minimum payment, term |
-| LoanBalanceSnapshot | Historical loan balance | account, as-of date, balance, source |
 
 Category names are unique without regard to letter case, while preserving the user's display spelling. Deleting a category archives it rather than removing it, so transactions, budgets, and merchant rules retain their historical relationship.
 
-Deleting an account also archives it rather than removing it. This preserves its future transaction, statement-import, and loan history. A current balance is optional because an account may be created before a statement or manual balance is available.
+Deleting an account also archives it rather than removing it. This preserves its transaction and
+statement-import history. A current balance is optional because an account may be created before a
+statement or manual balance is available.
+
+The initial migration contains dormant `LoanTerms` and `LoanBalanceSnapshot` tables. Debt planning
+was later removed from product scope, so these tables have no service, API, or interface. They
+remain only to preserve migration history; any future physical removal should use a new migration.
 
 ## Merchant matching
 

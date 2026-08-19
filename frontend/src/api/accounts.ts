@@ -1,4 +1,4 @@
-export type AccountType = 'checking' | 'credit_card' | 'loan'
+export type AccountType = 'checking' | 'credit_card'
 
 export type Account = {
   id: string

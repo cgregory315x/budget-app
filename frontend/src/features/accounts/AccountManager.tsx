@@ -159,7 +159,6 @@ export function AccountManager() {
               >
                 <option value="checking">Checking</option>
                 <option value="credit_card">Credit card</option>
-                <option value="loan">Loan</option>
               </select>
             </label>
             <label>

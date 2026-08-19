@@ -10,8 +10,6 @@ from app.db.base import Base
 from app.db.models import (
     Account,
     Category,
-    LoanBalanceSnapshot,
-    LoanTerms,
     MerchantRule,
     MonthlyBudget,
     MonthlyIncome,
@@ -32,8 +30,6 @@ def db_session() -> Generator[Session]:
         tables=[
             cast(Table, Account.__table__),
             cast(Table, Category.__table__),
-            cast(Table, LoanTerms.__table__),
-            cast(Table, LoanBalanceSnapshot.__table__),
             cast(Table, StatementImport.__table__),
             cast(Table, Transaction.__table__),
             cast(Table, MerchantRule.__table__),
