@@ -13,6 +13,8 @@ const category = {
   updated_at: '2026-08-14T12:00:00Z',
 }
 
+const archivedCategory = { ...category, archived: true }
+
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -67,7 +69,7 @@ describe('CategoryManager', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Archive' }))
 
     await waitFor(() => expect(screen.queryByText('Synthetic Groceries')).not.toBeInTheDocument())
-    expect(screen.getByText(/No categories yet/)).toBeInTheDocument()
+    expect(screen.getByText(/No active categories/)).toBeInTheDocument()
   })
 
   it('surfaces a sanitized API error', async () => {
@@ -78,5 +80,25 @@ describe('CategoryManager', () => {
     render(<CategoryManager />)
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Category service unavailable')
+  })
+
+  it('shows and restores archived categories', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse([archivedCategory]))
+      .mockResolvedValueOnce(jsonResponse(category))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<CategoryManager />)
+
+    await screen.findByText(/No active categories/)
+    fireEvent.click(screen.getByLabelText('Show archived (1)'))
+    expect(await screen.findByText('Synthetic Groceries')).toBeInTheDocument()
+    expect(screen.getByText('expense · archived')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Restore' }))
+
+    expect(await screen.findByRole('button', { name: 'Archive' })).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      `/api/v1/categories/${category.id}/restore`,
+      { method: 'POST' },
+    )
   })
 })

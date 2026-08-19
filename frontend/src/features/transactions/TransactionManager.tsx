@@ -112,6 +112,11 @@ export function TransactionManager() {
         }))
       }).catch(() => setError('Accounts could not be loaded.'))
     }
+    if (scopes.includes('categories')) {
+      void listCategories()
+        .then(setCategories)
+        .catch(() => setError('Categories could not be loaded.'))
+    }
     if (scopes.includes('transactions')) {
       void loadTransactions(filters)
         .then(setTransactions)

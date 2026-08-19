@@ -74,3 +74,12 @@ def archive_category(session: Session, category_id: uuid.UUID) -> None:
     if not category.archived:
         category.archived = True
         session.commit()
+
+
+def restore_category(session: Session, category_id: uuid.UUID) -> Category:
+    category = get_category(session, category_id)
+    if category.archived:
+        category.archived = False
+        session.commit()
+        session.refresh(category)
+    return category

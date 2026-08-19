@@ -1,4 +1,4 @@
-export type BudgetDataScope = 'accounts' | 'transactions' | 'summary'
+export type BudgetDataScope = 'accounts' | 'categories' | 'transactions' | 'summary'
 
 const eventName = 'budget-app:data-changed'
 

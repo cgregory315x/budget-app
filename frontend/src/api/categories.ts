@@ -34,8 +34,8 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T
 }
 
-export function listCategories(): Promise<Category[]> {
-  return request<Category[]>('/api/v1/categories')
+export function listCategories(includeArchived = false): Promise<Category[]> {
+  return request<Category[]>(`/api/v1/categories${includeArchived ? '?include_archived=true' : ''}`)
 }
 
 export function createCategory(input: CategoryInput): Promise<Category> {
@@ -56,4 +56,8 @@ export function updateCategory(id: string, input: CategoryInput): Promise<Catego
 
 export function archiveCategory(id: string): Promise<void> {
   return request<void>(`/api/v1/categories/${id}`, { method: 'DELETE' })
+}
+
+export function restoreCategory(id: string): Promise<Category> {
+  return request<Category>(`/api/v1/categories/${id}/restore`, { method: 'POST' })
 }

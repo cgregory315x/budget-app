@@ -19,7 +19,10 @@ def _not_found() -> HTTPException:
 def _conflict() -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_409_CONFLICT,
-        detail="A category with that name already exists",
+        detail=(
+            "A category with that name already exists, including archived categories. "
+            "Restore the archived category instead."
+        ),
     )
 
 
@@ -78,3 +81,16 @@ def archive(category_id: uuid.UUID, session: SessionDependency) -> Response:
     except categories.CategoryNotFoundError as error:
         raise _not_found() from error
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/{category_id}/restore",
+    response_model=CategoryResponse,
+    summary="Restore an archived category",
+)
+def restore(category_id: uuid.UUID, session: SessionDependency) -> CategoryResponse:
+    try:
+        category = categories.restore_category(session, category_id)
+    except categories.CategoryNotFoundError as error:
+        raise _not_found() from error
+    return CategoryResponse.model_validate(category)

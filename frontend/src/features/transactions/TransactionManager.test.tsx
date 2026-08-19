@@ -142,4 +142,16 @@ describe('TransactionManager', () => {
     expect(await screen.findByText('Example Market')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledTimes(4)
   })
+
+  it('reloads category dropdowns when categories change', async () => {
+    const food = { ...category, id: '11111111-1111-1111-1111-111111111111', name: 'Food' }
+    const fetchMock = initialFetch().mockResolvedValueOnce(jsonResponse([category, food]))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<TransactionManager />)
+
+    await screen.findByText(/No transactions match/)
+    emitDataChanged('categories')
+
+    expect(await screen.findAllByRole('option', { name: 'Food' })).toHaveLength(2)
+  })
 })

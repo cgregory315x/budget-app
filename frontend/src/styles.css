@@ -1036,6 +1036,30 @@ h2 {
   border-bottom: 1px solid #ebe7dd;
 }
 
+.category-heading-actions,
+.show-archived-label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.show-archived-label {
+  gap: 7px;
+  color: #71807c;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.show-archived-label input {
+  width: 16px;
+  height: 16px;
+}
+
+.category-list .archived-row {
+  opacity: 0.72;
+  background: #f7f5ef;
+}
+
 .account-list li {
   grid-template-columns: auto minmax(0, 1fr) auto auto auto;
 }

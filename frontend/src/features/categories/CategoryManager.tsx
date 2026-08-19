@@ -7,8 +7,10 @@ import {
   CategoryKind,
   createCategory,
   listCategories,
+  restoreCategory,
   updateCategory,
 } from '../../api/categories'
+import { emitDataChanged } from '../../dataEvents'
 
 const initialInput: CategoryInput = {
   name: '',
@@ -20,13 +22,14 @@ export function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([])
   const [input, setInput] = useState<CategoryInput>(initialInput)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showArchived, setShowArchived] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
-    listCategories()
+    listCategories(true)
       .then((result) => {
         if (active) setCategories(result)
       })
@@ -60,6 +63,7 @@ export function CategoryManager() {
         ),
       )
       resetForm()
+      emitDataChanged('categories')
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The category could not be saved.')
     } finally {
@@ -77,12 +81,33 @@ export function CategoryManager() {
     setError(null)
     try {
       await archiveCategory(category.id)
-      setCategories((current) => current.filter((item) => item.id !== category.id))
+      setCategories((current) => current.map((item) =>
+        item.id === category.id ? { ...item, archived: true } : item,
+      ))
       if (editingId === category.id) resetForm()
+      emitDataChanged('categories')
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The category could not be archived.')
     }
   }
+
+  async function restore(category: Category) {
+    setError(null)
+    try {
+      const restored = await restoreCategory(category.id)
+      setCategories((current) => current.map((item) =>
+        item.id === restored.id ? restored : item,
+      ))
+      emitDataChanged('categories')
+    } catch (reason: unknown) {
+      setError(reason instanceof Error ? reason.message : 'The category could not be restored.')
+    }
+  }
+
+  const activeCategories = categories.filter((category) => !category.archived)
+  const visibleCategories = showArchived
+    ? categories
+    : activeCategories
 
   return (
     <section id="categories" className="panel category-panel" aria-labelledby="category-heading">
@@ -91,7 +116,17 @@ export function CategoryManager() {
           <p className="eyebrow">Budget building blocks</p>
           <h2 id="category-heading">Categories</h2>
         </div>
-        <span className="category-count">{categories.length} active</span>
+        <div className="category-heading-actions">
+          <label className="show-archived-label">
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={(event) => setShowArchived(event.target.checked)}
+            />
+            Show archived ({categories.length - activeCategories.length})
+          </label>
+          <span className="category-count">{activeCategories.length} active</span>
+        </div>
       </div>
 
       <div className="category-layout">
@@ -148,23 +183,35 @@ export function CategoryManager() {
           {error && <p className="form-error" role="alert">{error}</p>}
           {loading ? (
             <p className="empty-state">Loading categories…</p>
-          ) : categories.length === 0 ? (
-            <p className="empty-state">No categories yet. Add one to start organizing your budget.</p>
+          ) : visibleCategories.length === 0 ? (
+            <p className="empty-state">
+              {categories.length > 0
+                ? 'No active categories. Turn on Show archived to restore one.'
+                : 'No categories yet. Add one to start organizing your budget.'}
+            </p>
           ) : (
             <ul className="category-list">
-              {categories.map((category) => (
-                <li key={category.id}>
+              {visibleCategories.map((category) => (
+                <li key={category.id} className={category.archived ? 'archived-row' : ''}>
                   <span className="category-swatch" style={{ backgroundColor: category.color }} />
                   <span className="category-details">
                     <strong>{category.name}</strong>
-                    <span>{category.kind}</span>
+                    <span>{category.kind}{category.archived ? ' · archived' : ''}</span>
                   </span>
-                  <button className="text-button" type="button" onClick={() => beginEditing(category)}>
-                    Edit
-                  </button>
-                  <button className="archive-button" type="button" onClick={() => archive(category)}>
-                    Archive
-                  </button>
+                  {category.archived ? (
+                    <button className="text-button" type="button" onClick={() => restore(category)}>
+                      Restore
+                    </button>
+                  ) : (
+                    <>
+                      <button className="text-button" type="button" onClick={() => beginEditing(category)}>
+                        Edit
+                      </button>
+                      <button className="archive-button" type="button" onClick={() => archive(category)}>
+                        Archive
+                      </button>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>

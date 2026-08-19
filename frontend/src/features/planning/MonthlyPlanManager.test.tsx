@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { emitDataChanged } from '../../dataEvents'
 import { MonthlyPlanManager } from './MonthlyPlanManager'
 
 const category = {
@@ -119,5 +120,17 @@ describe('MonthlyPlanManager', () => {
     await screen.findAllByText('$0.00')
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/budgets?month=2026-09-01', undefined)
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/income?month=2026-09-01', undefined)
+  })
+
+  it('reloads the budget category dropdown when categories change', async () => {
+    const food = { ...category, id: '11111111-1111-1111-1111-111111111111', name: 'Food' }
+    const fetchMock = initialFetch().mockResolvedValueOnce(jsonResponse([category, food]))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<MonthlyPlanManager />)
+
+    await screen.findAllByText('$0.00')
+    emitDataChanged('categories')
+
+    expect(await screen.findByRole('option', { name: 'Food' })).toBeInTheDocument()
   })
 })

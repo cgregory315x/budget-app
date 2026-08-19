@@ -13,6 +13,7 @@ import {
   updateBudget,
   updateIncome,
 } from '../../api/monthlyPlanning'
+import { onDataChanged } from '../../dataEvents'
 
 function currentMonth() {
   const current = new Date()
@@ -85,6 +86,20 @@ export function MonthlyPlanManager() {
       active = false
     }
   }, [month])
+
+  useEffect(() => onDataChanged((scopes) => {
+    if (!scopes.includes('categories')) return
+    void listCategories()
+      .then((result) => {
+        setCategories(result)
+        setBudgetCategory((current) =>
+          result.some((category) => category.id === current && category.kind === 'expense')
+            ? current
+            : result.find((category) => category.kind === 'expense')?.id ?? '',
+        )
+      })
+      .catch(() => setError('Categories could not be loaded.'))
+  }), [])
 
   function resetBudgetForm() {
     setEditingBudget(null)

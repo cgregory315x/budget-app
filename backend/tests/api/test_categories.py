@@ -26,6 +26,7 @@ def test_category_api_contract_is_registered() -> None:
 
     assert set(paths["/api/v1/categories"]) == {"get", "post"}
     assert set(paths["/api/v1/categories/{category_id}"]) == {"get", "patch", "delete"}
+    assert set(paths["/api/v1/categories/{category_id}/restore"]) == {"post"}
     assert paths["/api/v1/categories"]["post"]["responses"].keys() >= {"201", "422"}
     assert paths["/api/v1/categories/{category_id}"]["delete"]["responses"].keys() >= {
         "204",
@@ -74,6 +75,10 @@ def test_archive_is_idempotent_and_filtered_by_default(db_session: Session) -> N
     categories.archive_category(db_session, created.id)
     assert categories.list_categories(db_session) == []
     assert categories.list_categories(db_session, include_archived=True)[0].archived is True
+
+    restored = categories.restore_category(db_session, created.id)
+    assert restored.archived is False
+    assert categories.list_categories(db_session) == [restored]
 
 
 def test_duplicate_normalized_name_is_rejected(db_session: Session) -> None:
