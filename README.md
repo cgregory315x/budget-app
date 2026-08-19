@@ -89,4 +89,4 @@ Run backend validation with `pytest`, `ruff check app tests`, and `mypy app test
 - [Architecture](docs/architecture.md)
 - [Data model](docs/data-model.md)
 - [Roadmap](docs/roadmap.md)
-- [Milestone 4 session handoff](docs/milestone-4-handoff.md)
+- [Milestone 5 session handoff](docs/milestone-5-handoff.md)
