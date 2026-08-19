@@ -28,6 +28,8 @@ Deleting an account also archives it rather than removing it. This preserves its
 
 Monthly budgets apply only to active expense categories, with at most one limit per category and month. Monthly income is stored as one or more positive entries so separate expected income sources remain visible while still supporting a monthly total.
 
+The monthly summary compares that expected-income total with confirmed transactions for the selected month. Transfers and transactions excluded from the budget do not affect the summary. Positive transactions in income categories, along with positive uncategorized transactions, count as recorded inflows. Expense-category refunds reduce that category's spending, while negative uncategorized transactions count as uncategorized spending. The available amount is expected income less total spending; recorded inflows are shown separately and do not replace the user's plan.
+
 ## Duplicate detection
 
 Each confirmed transaction receives a deterministic fingerprint derived from the account, posted date, normalized description, amount, and a stable occurrence index. Statement imports also store a SHA-256 file hash. Neither mechanism should silently discard a candidate; possible duplicates must appear in the review flow.

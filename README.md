@@ -6,7 +6,7 @@ The initial supported statement format is selectable-text Navy Federal Credit Un
 
 ## Current status
 
-The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, and expected income are available through the API and dashboard; the real monthly summary and PDF import workflow are still in development.
+The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard; the PDF import workflow is still in development.
 
 ## Stack
 
@@ -21,7 +21,15 @@ The repository contains the product plan, a migrated domain schema, a FastAPI se
 ## Quick start
 
 1. Copy `.env.example` to `.env` and adjust values if needed.
-2. Start PostgreSQL with `docker compose up -d db`.
+2. Start PostgreSQL and confirm it is running:
+
+   ```bash
+   docker compose up -d db
+   docker compose ps
+   ```
+
+   If Docker reports permission denied while connecting to `/var/run/docker.sock`,
+   use `sudo docker compose up -d db` as a temporary workaround.
 3. Install and run the backend:
 
    ```bash
@@ -32,6 +40,10 @@ The repository contains the product plan, a migrated domain schema, a FastAPI se
    alembic upgrade head
    uvicorn app.main:app --reload
    ```
+
+   PostgreSQL must be running before `alembic upgrade head` or any database-backed
+   API request. After restarting the database later, run `alembic upgrade head`
+   again before refreshing the web client.
 
 4. In another terminal, install and run the frontend:
 

@@ -203,6 +203,38 @@ h2 {
   gap: 16px;
 }
 
+.summary-dashboard {
+  display: grid;
+  gap: 18px;
+}
+
+.summary-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+}
+
+.summary-toolbar h2 {
+  font-size: 1.55rem;
+}
+
+.summary-state {
+  min-height: 150px;
+  padding: 40px;
+  place-content: center;
+  color: #71807c;
+  text-align: center;
+}
+
+.real-dashboard-grid {
+  margin-top: 0;
+}
+
+.dashboard-empty {
+  margin-top: 26px;
+}
+
 .summary-card,
 .panel {
   border: 1px solid #e3dfd5;
@@ -357,6 +389,35 @@ h2 {
 .sample-note {
   color: #899590;
   font-size: 0.72rem;
+}
+
+.composition-legend {
+  display: grid;
+  gap: 8px;
+  max-height: 150px;
+  margin: 0;
+  padding: 0 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.composition-legend li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  color: #71807c;
+  font-size: 0.72rem;
+}
+
+.composition-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.composition-legend strong {
+  color: #52655f;
 }
 
 .sample-note {
@@ -961,6 +1022,10 @@ a:focus-visible {
   }
 
   .page-header {
+    align-items: flex-start;
+  }
+
+  .summary-toolbar {
     align-items: flex-start;
   }
 
