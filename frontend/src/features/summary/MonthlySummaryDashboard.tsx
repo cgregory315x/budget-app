@@ -178,9 +178,19 @@ export function MonthlySummaryDashboard() {
           ) : (
             <div className="progress-list">
               {summary.budget_progress.map((budget) => {
-                const width = Math.min(Number(budget.percent_used ?? 0), 100)
+                const percentUsed = Number(budget.percent_used ?? 0)
+                const width = Math.min(percentUsed, 100)
+                const statusText = budget.overspent
+                  ? `Over budget by ${money(String(Math.abs(Number(budget.remaining))))}`
+                  : `${money(budget.remaining)} remaining`
+                const percentageText = budget.percent_used === null
+                  ? 'Percentage unavailable for a zero-dollar limit'
+                  : `${budget.percent_used}% used`
                 return (
-                  <div className="progress-item" key={budget.budget_id}>
+                  <div
+                    className={`progress-item${budget.overspent ? ' is-overspent' : ''}`}
+                    key={budget.budget_id}
+                  >
                     <div className="progress-label">
                       <span>{budget.name}</span>
                       <span
@@ -190,7 +200,15 @@ export function MonthlySummaryDashboard() {
                         <strong>{money(budget.spent)}</strong> / {money(budget.limit_amount)}
                       </span>
                     </div>
-                    <div className="progress-track">
+                    <div
+                      className="progress-track"
+                      role="progressbar"
+                      aria-label={`${budget.name} budget usage`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.min(percentUsed, 100)}
+                      aria-valuetext={`${statusText}; ${percentageText}`}
+                    >
                       <span
                         className="progress-fill"
                         style={{
@@ -199,6 +217,10 @@ export function MonthlySummaryDashboard() {
                         }}
                       />
                     </div>
+                    <p className={`budget-status${budget.overspent ? ' attention' : ''}`}>
+                      <strong>{statusText}</strong>
+                      <span>{percentageText}</span>
+                    </p>
                   </div>
                 )
               })}

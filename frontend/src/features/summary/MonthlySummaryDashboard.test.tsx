@@ -34,6 +34,17 @@ const summary = {
       percent_used: '106.7',
       overspent: true,
     },
+    {
+      budget_id: '5ca3ff89-3e09-4192-bb5a-c160e3ad7ef5',
+      category_id: '446e2ee8-6269-47b7-82cd-4ed648894700',
+      name: 'Synthetic Utilities',
+      color: '#6783BA',
+      limit_amount: '200.00',
+      spent: '50.00',
+      remaining: '150.00',
+      percent_used: '25.0',
+      overspent: false,
+    },
   ],
 }
 
@@ -94,6 +105,14 @@ describe('MonthlySummaryDashboard', () => {
 
     expect(await screen.findAllByText('Synthetic Groceries')).toHaveLength(2)
     expect(screen.getByLabelText('$80.00 spent of $75.00')).toBeInTheDocument()
+    expect(screen.getByText('Over budget by $5.00')).toBeInTheDocument()
+    expect(screen.getByText('$150.00 remaining')).toBeInTheDocument()
+    expect(screen.getByText('106.7% used')).toBeInTheDocument()
+    expect(screen.getByText('25.0% used')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Synthetic Groceries budget usage' }))
+      .toHaveAttribute('aria-valuetext', 'Over budget by $5.00; 106.7% used')
+    expect(screen.getByRole('progressbar', { name: 'Synthetic Utilities budget usage' }))
+      .toHaveAttribute('aria-valuenow', '25')
     expect(screen.getByText('Uncategorized')).toBeInTheDocument()
     expect(
       screen.getByRole('img', { name: 'Spending composition totaling $110.00' }),
