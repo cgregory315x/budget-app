@@ -14,6 +14,8 @@ export type MerchantRuleInput = Omit<MerchantRule, 'id' | 'pattern_normalized'>
 
 export type RuleMatch = {
   transaction_id: string
+  account_id: string
+  account_name: string
   description: string
   merchant_normalized: string
   posted_date: string

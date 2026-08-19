@@ -175,6 +175,7 @@ def preview_matches(session: Session) -> tuple[list[Match], int]:
     transactions = list(
         session.scalars(
             select(Transaction)
+            .options(joinedload(Transaction.account))
             .where(Transaction.category_id.is_(None))
             .order_by(Transaction.posted_date.desc(), Transaction.id)
         )

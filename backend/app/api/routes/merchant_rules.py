@@ -111,6 +111,8 @@ def preview(session: SessionDependency) -> RulePreviewResponse:
         matches=[
             RuleMatchPreview(
                 transaction_id=match.transaction.id,
+                account_id=match.transaction.account_id,
+                account_name=match.transaction.account.name,
                 description=match.transaction.description,
                 merchant_normalized=match.transaction.merchant_normalized
                 or normalize_merchant(match.transaction.description),

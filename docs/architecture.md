@@ -70,6 +70,9 @@ The current Milestone 3 slice is local and deterministic:
 9. Transactions expose categorization provenance. Accepted rule suggestions reference the winning
    rule; direct assignments and corrected suggestions are manual. A later category change clears
    stale rule provenance without relabeling unrelated transaction edits.
+10. Match-review filters run locally over the read-only preview. Merchant, account, date, approved
+    category, and corrected-only filters never alter matching or discard hidden decisions. Bulk
+    selection applies only to visible rows while the interface retains the total selected count.
 
 There is no history-based, AI, or autonomous fallback in this slice. A later Milestone 3 slice may
 add suggestions for unresolved items, but they must remain behind explicit user approval.

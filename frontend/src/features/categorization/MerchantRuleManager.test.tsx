@@ -5,7 +5,7 @@ import { MerchantRuleManager } from './MerchantRuleManager'
 
 const category = { id: 'cat-1', name: 'Groceries', kind: 'expense', color: '#123456', archived: false, created_at: '', updated_at: '' }
 const rule = { id: 'rule-1', pattern: 'Acme', pattern_normalized: 'ACME', match_type: 'contains', category_id: 'cat-1', priority: 100, enabled: true }
-const match = { transaction_id: 'tx-1', description: 'Acme #42', merchant_normalized: 'ACME 42', posted_date: '2026-08-01', amount: '-12.50', rule_id: 'rule-1', rule_pattern: 'Acme', category_id: 'cat-1', category_name: 'Groceries', competing_rules: [], conflict_explanation: null }
+const match = { transaction_id: 'tx-1', account_id: 'account-1', account_name: 'Checking', description: 'Acme #42', merchant_normalized: 'ACME 42', posted_date: '2026-08-01', amount: '-12.50', rule_id: 'rule-1', rule_pattern: 'Acme', category_id: 'cat-1', category_name: 'Groceries', competing_rules: [], conflict_explanation: null }
 
 function json(body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }) }
 
@@ -83,6 +83,42 @@ describe('MerchantRuleManager', () => {
 
     expect(screen.getByText(/lower numbers run first/)).toBeInTheDocument()
     expect(screen.getByText(/“Acm” → Groceries/)).toBeInTheDocument()
+  })
+
+  it('filters review rows without losing selections or corrections', async () => {
+    const coffee = { ...category, id: 'cat-2', name: 'Coffee' }
+    const secondMatch = {
+      ...match,
+      transaction_id: 'tx-2',
+      account_id: 'account-2',
+      account_name: 'Credit card',
+      description: 'Acme Cafe',
+      posted_date: '2026-08-15',
+    }
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(json([rule]))
+      .mockResolvedValueOnce(json([category, coffee]))
+      .mockResolvedValueOnce(json({ matches: [match, secondMatch], unmatched_count: 0 }))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<MerchantRuleManager />)
+
+    await screen.findByText('Acme')
+    fireEvent.click(screen.getByRole('button', { name: 'Preview matches' }))
+    await screen.findByText('Acme Cafe')
+    fireEvent.change(screen.getByLabelText('Category for Acme #42'), {
+      target: { value: coffee.id },
+    })
+    fireEvent.click(screen.getByLabelText('Corrected only'))
+
+    expect(screen.getByText('Acme #42')).toBeInTheDocument()
+    expect(screen.queryByText('Acme Cafe')).not.toBeInTheDocument()
+    expect(screen.getByText('1 visible selected · 2 total selected')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Deselect visible' }))
+    expect(screen.getByText('0 visible selected · 1 total selected')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
+    expect(screen.getByText('Acme Cafe')).toBeInTheDocument()
+    expect(screen.getByLabelText('Category for Acme #42')).toHaveValue(coffee.id)
   })
 
   it('corrects a preview, learns an exact rule, and explicitly applies it', async () => {

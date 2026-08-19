@@ -76,6 +76,8 @@ class CompetingRulePreview(BaseModel):
 
 class RuleMatchPreview(BaseModel):
     transaction_id: uuid.UUID
+    account_id: uuid.UUID
+    account_name: str
     description: str
     merchant_normalized: str
     posted_date: str

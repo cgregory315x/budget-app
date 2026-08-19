@@ -35,6 +35,7 @@
 - [Complete] Deterministic approval, correction, and exact-rule learning flow.
 - [Complete] Transaction categorization provenance for manual and merchant-rule assignments.
 - [Complete] Rule re-enabling and explainable conflict review.
+- [Complete] Scalable match review filters with stable corrections and selection.
 - Privacy and prompt-injection tests around statement descriptions.
 
 ## Milestone 4: Reporting polish
