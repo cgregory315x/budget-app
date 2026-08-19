@@ -8,7 +8,11 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.categorization.merchant import normalize_merchant, normalize_regex_pattern
 from app.db.models import Category, MerchantRule, RuleMatchType, Transaction
-from app.schemas.merchant_rules import MerchantRuleCreate, MerchantRuleUpdate
+from app.schemas.merchant_rules import (
+    MerchantRuleCreate,
+    MerchantRuleUpdate,
+    RuleApplyDecision,
+)
 
 
 class MerchantRuleNotFoundError(Exception):
@@ -165,17 +169,60 @@ def preview_matches(session: Session) -> tuple[list[Match], int]:
     return matches, unmatched
 
 
-def apply_matches(session: Session, transaction_ids: list[uuid.UUID]) -> tuple[int, int]:
-    requested = set(transaction_ids)
+def _learn_exact_rule(
+    session: Session, merchant: str, category_id: uuid.UUID
+) -> bool:
+    existing = session.scalar(
+        select(MerchantRule).where(
+            MerchantRule.pattern_normalized == merchant,
+            MerchantRule.match_type == RuleMatchType.EXACT,
+        )
+    )
+    if existing is not None:
+        changed = existing.category_id != category_id or not existing.enabled
+        existing.category_id = category_id
+        existing.enabled = True
+        return changed
+    session.add(
+        MerchantRule(
+            pattern=merchant,
+            pattern_normalized=merchant,
+            match_type=RuleMatchType.EXACT,
+            category_id=category_id,
+            priority=100,
+            enabled=True,
+        )
+    )
+    return True
+
+
+def apply_matches(
+    session: Session, decisions: list[RuleApplyDecision]
+) -> tuple[int, int, int]:
     preview, _ = preview_matches(session)
     winners = {match.transaction.id: match for match in preview}
     applied = 0
-    for transaction_id in requested:
-        match = winners.get(transaction_id)
+    learned = 0
+    active_categories = set(
+        session.scalars(select(Category.id).where(Category.archived.is_(False)))
+    )
+    for decision in decisions:
+        match = winners.get(decision.transaction_id)
         if match is None or match.transaction.category_id is not None:
             continue
-        match.transaction.category_id = match.rule.category_id
+        if decision.category_id not in active_categories:
+            continue
+        match.transaction.category_id = decision.category_id
         match.transaction.categorization_confidence = None
+        if decision.save_exact_rule:
+            merchant = match.transaction.merchant_normalized or normalize_merchant(
+                match.transaction.description
+            )
+            learned += _learn_exact_rule(session, merchant, decision.category_id)
         applied += 1
-    session.commit()
-    return applied, len(requested) - applied
+    try:
+        session.commit()
+    except IntegrityError as error:
+        session.rollback()
+        raise MerchantRuleConflictError from error
+    return applied, len(decisions) - applied, learned

@@ -118,5 +118,12 @@ def preview(session: SessionDependency) -> RulePreviewResponse:
 
 @router.post("/matches/apply", response_model=RuleApplyResponse)
 def apply(data: RuleApplyRequest, session: SessionDependency) -> RuleApplyResponse:
-    applied, skipped = merchant_rules.apply_matches(session, data.transaction_ids)
-    return RuleApplyResponse(applied_count=applied, skipped_count=skipped)
+    try:
+        applied, skipped, learned = merchant_rules.apply_matches(session, data.decisions)
+    except merchant_rules.MerchantRuleConflictError as error:
+        raise _save_error(error) from error
+    return RuleApplyResponse(
+        applied_count=applied,
+        skipped_count=skipped,
+        learned_rule_count=learned,
+    )

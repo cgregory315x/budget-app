@@ -41,14 +41,25 @@ describe('MerchantRuleManager', () => {
     expect(screen.getByLabelText('Rule category')).toHaveValue(category.id)
   })
 
-  it('previews selected matches and explicitly applies them', async () => {
-    const fetchMock = vi.fn().mockResolvedValueOnce(json([rule])).mockResolvedValueOnce(json([category])).mockResolvedValueOnce(json({ matches: [match], unmatched_count: 2 })).mockResolvedValueOnce(json({ applied_count: 1, skipped_count: 0 }))
+  it('corrects a preview, learns an exact rule, and explicitly applies it', async () => {
+    const coffee = { ...category, id: 'cat-2', name: 'Coffee' }
+    const learnedRule = { ...rule, id: 'rule-2', pattern: 'ACME 42', match_type: 'exact', category_id: coffee.id }
+    const fetchMock = vi.fn().mockResolvedValueOnce(json([rule])).mockResolvedValueOnce(json([category, coffee])).mockResolvedValueOnce(json({ matches: [match], unmatched_count: 2 })).mockResolvedValueOnce(json({ applied_count: 1, skipped_count: 0, learned_rule_count: 1 })).mockResolvedValueOnce(json([rule, learnedRule]))
     vi.stubGlobal('fetch', fetchMock); render(<MerchantRuleManager />)
     await screen.findByText('Acme')
     fireEvent.click(screen.getByRole('button', { name: 'Preview matches' }))
     expect(await screen.findByText(/2 unmatched/)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Category for Acme #42'), { target: { value: coffee.id } })
+    fireEvent.click(screen.getByLabelText('Save exact rule for Acme #42'))
     fireEvent.click(screen.getByRole('button', { name: 'Apply 1 selected' }))
     expect(await screen.findByRole('status')).toHaveTextContent('Applied 1 category')
-    await waitFor(() => expect(fetchMock).toHaveBeenLastCalledWith('/api/v1/merchant-rules/matches/apply', expect.objectContaining({ method: 'POST' })))
+    expect(screen.getByRole('status')).toHaveTextContent('saved 1 exact rule')
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/merchant-rules/matches/apply',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ decisions: [{ transaction_id: match.transaction_id, category_id: coffee.id, save_exact_rule: true }] }),
+      }),
+    ))
   })
 })

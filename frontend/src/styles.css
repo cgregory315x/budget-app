@@ -242,6 +242,35 @@ h2 {
   display: block;
 }
 
+.match-decision {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+
+.match-decision label:not(.checkbox-label) {
+  display: grid;
+  grid-template-columns: minmax(130px, auto) minmax(180px, 1fr);
+  gap: 10px;
+  align-items: center;
+  color: #4e615c;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.match-decision select {
+  padding: 8px 10px;
+  border: 1px solid #d6d2c8;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+}
+
+.review-actions {
+  display: flex;
+  gap: 12px;
+}
+
 .match-row small {
   margin-top: 4px;
   color: #71807c;

@@ -83,17 +83,25 @@ class RulePreviewResponse(BaseModel):
     unmatched_count: int
 
 
-class RuleApplyRequest(BaseModel):
-    transaction_ids: list[uuid.UUID] = Field(min_length=1, max_length=1000)
+class RuleApplyDecision(BaseModel):
+    transaction_id: uuid.UUID
+    category_id: uuid.UUID
+    save_exact_rule: bool = False
 
-    @field_validator("transaction_ids")
+
+class RuleApplyRequest(BaseModel):
+    decisions: list[RuleApplyDecision] = Field(min_length=1, max_length=1000)
+
+    @field_validator("decisions")
     @classmethod
-    def unique_ids(cls, value: list[uuid.UUID]) -> list[uuid.UUID]:
-        if len(set(value)) != len(value):
-            raise ValueError("transaction_ids must be unique")
+    def unique_ids(cls, value: list[RuleApplyDecision]) -> list[RuleApplyDecision]:
+        transaction_ids = [decision.transaction_id for decision in value]
+        if len(set(transaction_ids)) != len(transaction_ids):
+            raise ValueError("decisions must contain unique transaction IDs")
         return value
 
 
 class RuleApplyResponse(BaseModel):
     applied_count: int
     skipped_count: int
+    learned_rule_count: int

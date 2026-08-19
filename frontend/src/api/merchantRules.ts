@@ -26,7 +26,12 @@ export type RuleMatch = {
 }
 
 type Preview = { matches: RuleMatch[]; unmatched_count: number }
-type ApplyResult = { applied_count: number; skipped_count: number }
+export type RuleDecision = {
+  transaction_id: string
+  category_id: string
+  save_exact_rule: boolean
+}
+type ApplyResult = { applied_count: number; skipped_count: number; learned_rule_count: number }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init)
@@ -59,5 +64,5 @@ export const deleteMerchantRule = (id: string) =>
   request<void>(`/api/v1/merchant-rules/${id}`, { method: 'DELETE' })
 export const previewMerchantMatches = () =>
   request<Preview>('/api/v1/merchant-rules/matches/preview', json('POST'))
-export const applyMerchantMatches = (transactionIds: string[]) =>
-  request<ApplyResult>('/api/v1/merchant-rules/matches/apply', json('POST', { transaction_ids: transactionIds }))
+export const applyMerchantMatches = (decisions: RuleDecision[]) =>
+  request<ApplyResult>('/api/v1/merchant-rules/matches/apply', json('POST', { decisions }))

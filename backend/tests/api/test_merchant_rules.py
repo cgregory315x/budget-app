@@ -10,10 +10,15 @@ from app.db.models import (
     Category,
     CategoryKind,
     MerchantRule,
+    RuleMatchType,
     Transaction,
 )
 from app.main import create_app
-from app.schemas.merchant_rules import MerchantRuleCreate, MerchantRuleUpdate
+from app.schemas.merchant_rules import (
+    MerchantRuleCreate,
+    MerchantRuleUpdate,
+    RuleApplyDecision,
+)
 from app.services import merchant_rules
 
 
@@ -115,8 +120,20 @@ def test_preview_precedence_and_apply_never_overwrite(db_session: Session) -> No
     assert matches[0].rule.id == winner.id
     assert matches[0].competing_rule_ids == (broad.id,)
 
-    applied, skipped = merchant_rules.apply_matches(db_session, [uncategorized.id, assigned.id])
-    assert (applied, skipped) == (1, 1)
+    applied, skipped, learned = merchant_rules.apply_matches(
+        db_session,
+        [
+            RuleApplyDecision(
+                transaction_id=uncategorized.id,
+                category_id=groceries.id,
+            ),
+            RuleApplyDecision(
+                transaction_id=assigned.id,
+                category_id=groceries.id,
+            ),
+        ],
+    )
+    assert (applied, skipped, learned) == (1, 1, 0)
     db_session.refresh(uncategorized)
     db_session.refresh(assigned)
     assert uncategorized.category_id == groceries.id
@@ -129,3 +146,51 @@ def test_lower_priority_number_wins_conflict(db_session: Session) -> None:
     preferred = make_rule(db_session, coffee, pattern="Market", priority=10)
     matches, _ = merchant_rules.preview_matches(db_session)
     assert matches[0].rule.id == preferred.id
+
+
+def test_correction_can_learn_and_refine_exact_rule(db_session: Session) -> None:
+    groceries, coffee, uncategorized, _ = seed(db_session)
+    make_rule(db_session, groceries, pattern="Acme", priority=100)
+
+    result = merchant_rules.apply_matches(
+        db_session,
+        [
+            RuleApplyDecision(
+                transaction_id=uncategorized.id,
+                category_id=coffee.id,
+                save_exact_rule=True,
+            )
+        ],
+    )
+
+    assert result == (1, 0, 1)
+    db_session.refresh(uncategorized)
+    assert uncategorized.category_id == coffee.id
+    exact = db_session.query(MerchantRule).filter_by(
+        pattern_normalized="ACME MARKET 42",
+        match_type=RuleMatchType.EXACT,
+    ).one()
+    assert exact.category_id == coffee.id
+    assert exact.enabled is True
+
+
+def test_apply_skips_archived_correction_category(db_session: Session) -> None:
+    groceries, coffee, uncategorized, _ = seed(db_session)
+    make_rule(db_session, groceries)
+    coffee.archived = True
+    db_session.commit()
+
+    result = merchant_rules.apply_matches(
+        db_session,
+        [
+            RuleApplyDecision(
+                transaction_id=uncategorized.id,
+                category_id=coffee.id,
+                save_exact_rule=True,
+            )
+        ],
+    )
+
+    assert result == (0, 1, 0)
+    db_session.refresh(uncategorized)
+    assert uncategorized.category_id is None

@@ -32,7 +32,7 @@
 - [Complete] Merchant-rule management and explicit match preview/apply review.
 - [Complete] Explainable precedence, conflict visibility, and existing-category protection.
 - External AI provider gateway for unresolved transactions.
-- Approval, correction, and rule-learning flow.
+- [Complete] Deterministic approval, correction, and exact-rule learning flow.
 - Privacy and prompt-injection tests around statement descriptions.
 
 ## Milestone 4: Reporting polish

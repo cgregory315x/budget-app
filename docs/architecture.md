@@ -61,6 +61,11 @@ The current Milestone 3 slice is local and deterministic:
 5. Preview returns the winner and any lower-precedence competing rule IDs. It writes nothing.
 6. Apply accepts the user's selected transaction IDs, recalculates winners, and skips any
    transaction categorized or no longer matched since preview.
+7. Each selected row carries an explicitly approved active category. The user may keep the
+   suggestion or correct it; unchecked rows are omitted and remain unchanged.
+8. The user may save an approval or correction as an exact rule for that normalized merchant.
+   Existing exact rules are retargeted and re-enabled instead of duplicated. Transaction updates
+   and learned-rule changes commit atomically.
 
 There is no history-based, AI, or autonomous fallback in this slice. A later Milestone 3 slice may
 add suggestions for unresolved items, but they must remain behind explicit user approval.

@@ -37,6 +37,12 @@ Preview is read-only. Apply recalculates the preview and changes only explicitly
 currently uncategorized transactions. A manual category assignment is never overwritten, including
 when it happens between preview and apply.
 
+During review, each selected match may retain its suggested category or use a different active
+category. A corrected decision can optionally be learned as an exact rule for the transaction's
+normalized merchant. If that exact rule already exists, learning retargets and re-enables it;
+otherwise it creates a priority-100 exact rule. The assignment and learned rule are one atomic
+operation. Archived correction categories and stale matches are skipped without changing data.
+
 ## Money conventions
 
 - Persist money as fixed-precision numeric values with two fractional digits for USD-facing fields.
