@@ -1,7 +1,7 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { emitDataChanged } from '../../dataEvents'
+import { emitDataChanged, onDataChanged } from '../../dataEvents'
 import { MonthlyPlanManager } from './MonthlyPlanManager'
 
 const category = {
@@ -64,6 +64,8 @@ describe('MonthlyPlanManager', () => {
   })
 
   it('creates a category budget and refreshes the month', async () => {
+    const dataChanged = vi.fn()
+    const unsubscribe = onDataChanged(dataChanged)
     const fetchMock = initialFetch()
       .mockResolvedValueOnce(jsonResponse(budget, 201))
       .mockResolvedValueOnce(jsonResponse([budget]))
@@ -81,9 +83,13 @@ describe('MonthlyPlanManager', () => {
       '/api/v1/budgets',
       expect.objectContaining({ method: 'POST' }),
     )
+    expect(dataChanged).toHaveBeenCalledWith(['summary'])
+    unsubscribe()
   })
 
   it('creates an expected income entry and refreshes the month', async () => {
+    const dataChanged = vi.fn()
+    const unsubscribe = onDataChanged(dataChanged)
     const fetchMock = initialFetch()
       .mockResolvedValueOnce(jsonResponse(income, 201))
       .mockResolvedValueOnce(jsonResponse([]))
@@ -104,6 +110,8 @@ describe('MonthlyPlanManager', () => {
       '/api/v1/income',
       expect.objectContaining({ method: 'POST' }),
     )
+    expect(dataChanged).toHaveBeenCalledWith(['summary'])
+    unsubscribe()
   })
 
   it('reloads entries when the selected month changes', async () => {
@@ -120,6 +128,32 @@ describe('MonthlyPlanManager', () => {
     await screen.findAllByText('$0.00')
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/budgets?month=2026-09-01', undefined)
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/income?month=2026-09-01', undefined)
+  })
+
+  it('refreshes the summary after deleting budget and income entries', async () => {
+    const dataChanged = vi.fn()
+    const unsubscribe = onDataChanged(dataChanged)
+    const fetchMock = initialFetch([budget], [income])
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([income]))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([]))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<MonthlyPlanManager />)
+
+    await screen.findByText('Synthetic Paycheck')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' })[0])
+    await waitFor(() => expect(screen.queryByText('$450.00')).not.toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    await waitFor(() => expect(screen.queryByText('Synthetic Paycheck')).not.toBeInTheDocument())
+
+    expect(dataChanged).toHaveBeenCalledTimes(2)
+    expect(dataChanged).toHaveBeenNthCalledWith(1, ['summary'])
+    expect(dataChanged).toHaveBeenNthCalledWith(2, ['summary'])
+    unsubscribe()
   })
 
   it('reloads the budget category dropdown when categories change', async () => {

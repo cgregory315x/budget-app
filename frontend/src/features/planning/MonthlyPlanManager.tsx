@@ -13,7 +13,7 @@ import {
   updateBudget,
   updateIncome,
 } from '../../api/monthlyPlanning'
-import { onDataChanged } from '../../dataEvents'
+import { emitDataChanged, onDataChanged } from '../../dataEvents'
 
 function currentMonth() {
   const current = new Date()
@@ -121,6 +121,7 @@ export function MonthlyPlanManager() {
     try {
       if (editingBudget) await updateBudget(editingBudget, input)
       else await createBudget(input)
+      emitDataChanged('summary')
       resetBudgetForm()
       await load(month)
     } catch (reason: unknown) {
@@ -138,6 +139,7 @@ export function MonthlyPlanManager() {
     try {
       if (editingIncome) await updateIncome(editingIncome, input)
       else await createIncome(input)
+      emitDataChanged('summary')
       resetIncomeForm()
       await load(month)
     } catch (reason: unknown) {
@@ -151,6 +153,7 @@ export function MonthlyPlanManager() {
     setError(null)
     try {
       await deleteBudget(entry.id)
+      emitDataChanged('summary')
       if (editingBudget === entry.id) resetBudgetForm()
       await load(month)
     } catch (reason: unknown) {
@@ -162,6 +165,7 @@ export function MonthlyPlanManager() {
     setError(null)
     try {
       await deleteIncome(entry.id)
+      emitDataChanged('summary')
       if (editingIncome === entry.id) resetIncomeForm()
       await load(month)
     } catch (reason: unknown) {

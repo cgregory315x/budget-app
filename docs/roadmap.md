@@ -37,12 +37,13 @@
 - [Complete] Scalable match review filters with stable corrections and selection.
 - [Complete] Deterministic end-to-end, privacy, adversarial-description, and regex-safety tests.
 
-## Milestone 4: Reporting polish
+## Milestone 4: Reporting polish — Complete
 
-- Category composition and budget progress visuals.
-- Income-versus-spending trends.
-- Responsive layout and accessible interactions.
-- Portfolio demo data that contains no real financial information.
+- [Complete] Category composition and accessible budget progress visuals.
+- [Complete] Six-month income-versus-spending trends with exact-value table.
+- [Complete] Responsive layout, keyboard focus, reduced motion, and color-independent warnings.
+- [Complete] Protected portfolio demo-data workflow containing no real financial information.
+- [Complete] Backend reporting and frontend component/accessibility coverage.
 
 ## Milestone 5: Debt planning
 

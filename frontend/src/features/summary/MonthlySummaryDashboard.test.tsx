@@ -134,6 +134,51 @@ describe('MonthlySummaryDashboard', () => {
       .toBeInTheDocument()
   })
 
+  it('handles zero income, spending, and a zero-dollar budget accessibly', async () => {
+    const zeroSummary = {
+      ...summary,
+      planned_income: '0.00',
+      actual_inflows: '0.00',
+      total_spending: '0.00',
+      available_after_spending: '0.00',
+      spending_percent: null,
+      remaining_percent: null,
+      uncategorized_count: 0,
+      category_spending: [],
+      budget_progress: [{
+        ...summary.budget_progress[1],
+        limit_amount: '0.00',
+        spent: '0.00',
+        remaining: '0.00',
+        percent_used: null,
+      }],
+    }
+    const zeroTrends = {
+      ...trends,
+      months: trends.months.map((point) => ({
+        ...point,
+        planned_income: '0.00',
+        actual_inflows: '0.00',
+        total_spending: '0.00',
+      })),
+    }
+    vi.stubGlobal('fetch', reportingFetch(zeroSummary, zeroTrends))
+    render(<MonthlySummaryDashboard />)
+
+    expect(await screen.findByText('Add expected income to calculate a percentage'))
+      .toBeInTheDocument()
+    expect(screen.getByText('No expected income set')).toBeInTheDocument()
+    expect(screen.getByText('No spending recorded for this month.')).toBeInTheDocument()
+    expect(screen.getByText('Percentage unavailable for a zero-dollar limit'))
+      .toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Synthetic Utilities budget usage' }))
+      .toHaveAttribute(
+        'aria-valuetext',
+        '$0.00 remaining; Percentage unavailable for a zero-dollar limit',
+      )
+    expect(screen.getByLabelText('Month')).toHaveAttribute('type', 'month')
+  })
+
   it('reloads the selected month', async () => {
     const fetchMock = reportingFetch()
     vi.stubGlobal('fetch', fetchMock)

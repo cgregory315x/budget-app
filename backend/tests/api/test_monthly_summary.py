@@ -2,8 +2,11 @@ import uuid
 from datetime import date
 from decimal import Decimal
 
+import pytest
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.api.routes.monthly_summary import monthly_trends
 from app.db.models import (
     Account,
     AccountType,
@@ -218,3 +221,30 @@ def test_builds_ordered_monthly_trends_with_empty_months(db_session: Session) ->
         Decimal("125.50"),
         Decimal("40.25"),
     ]
+
+
+def test_monthly_trends_route_contract_and_validation(db_session: Session) -> None:
+    response = monthly_trends(db_session, AUGUST, 2)
+
+    assert response.model_dump(mode="json") == {
+        "start_month": "2026-07-01",
+        "end_month": "2026-08-01",
+        "months": [
+            {
+                "month": "2026-07-01",
+                "planned_income": "0.00",
+                "actual_inflows": "0.00",
+                "total_spending": "0.00",
+            },
+            {
+                "month": "2026-08-01",
+                "planned_income": "0.00",
+                "actual_inflows": "0.00",
+                "total_spending": "0.00",
+            },
+        ],
+    }
+    with pytest.raises(HTTPException) as error:
+        monthly_trends(db_session, date(2026, 8, 2), 2)
+    assert error.value.status_code == 422
+    assert error.value.detail == "month must be the first day of a calendar month"

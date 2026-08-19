@@ -88,3 +88,17 @@ npm test -- --run
 ```
 
 Also run `git diff --check` from the repository root.
+
+## Completion status
+
+Milestone 4 was completed and fully verified on August 19, 2026. The delivered slice includes:
+
+- Backward-compatible multi-month reporting built from the established monthly-summary logic.
+- Category composition, explicit overspending warnings, and six-month income/spending visuals.
+- Accessible exact-value equivalents, keyboard focus treatment, reduced-motion support, and
+  narrow-screen layouts.
+- An explicit synthetic demo-data command that refuses to modify a non-empty database.
+- Backend reporting/demo-data tests and frontend dashboard/accessibility tests.
+
+Final validation completed with Ruff, mypy, 98 backend tests, frontend lint/build, 38 frontend
+tests, and `git diff --check`.

@@ -6,7 +6,7 @@ The initial supported statement formats are selectable-text Navy Federal Credit 
 
 ## Current status
 
-The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard. Milestone 2 is complete: selectable-text Navy Federal checking and credit-card statements can be safely previewed, reviewed, checked for duplicates, and explicitly confirmed through an atomic import workflow. Milestone 3 is complete with local deterministic merchant rules, explainable precedence, explicit preview/correction/apply review, rule learning, and categorization provenance.
+The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and real monthly reporting are available through the API and dashboard. Milestones 2–4 are complete: selectable-text Navy Federal statements have an atomic review/import workflow; local deterministic merchant rules provide explicit, explainable categorization; and the responsive dashboard includes category composition, accessible budget warnings, and six-month income-versus-spending trends.
 
 ## Statement import API
 
@@ -62,6 +62,23 @@ The upload limit can be changed with `STATEMENT_UPLOAD_MAX_BYTES`. Uploaded PDFs
    ```
 
 The API is available at `http://localhost:8000`; the web client defaults to `http://localhost:5173`.
+
+## Synthetic demonstration data
+
+An empty local database can be populated with six months of clearly fictional portfolio data after
+running migrations. From `backend/`, choose the final reporting month explicitly:
+
+```bash
+.venv/bin/python -m app.commands.seed_demo --end-month 2026-08 --confirm-empty-database
+```
+
+If the backend virtual environment is already active, use `python` instead of
+`.venv/bin/python`.
+
+The confirmation flag is mandatory, and the command refuses to run if any account, category,
+transaction, budget, income, merchant-rule, or statement-import data already exists. It never
+deletes or replaces existing records. All seeded institutions, merchants, balances, and
+transactions are synthetic and contain no real financial information.
 
 Run backend validation with `pytest`, `ruff check app tests`, and `mypy app tests` from
 `backend/`. Run frontend validation with `npm run check && npm test` from `frontend/`.
