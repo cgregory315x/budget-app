@@ -3,6 +3,7 @@ import unicodedata
 
 _WHITESPACE = re.compile(r"\s+")
 _PUNCTUATION = re.compile(r"[^A-Z0-9 ]+")
+MAX_NORMALIZED_MERCHANT_LENGTH = 200
 
 
 def normalize_merchant(description: str) -> str:
@@ -17,7 +18,9 @@ def normalize_merchant(description: str) -> str:
     )
     uppercase = ascii_description.upper()
     without_punctuation = _PUNCTUATION.sub(" ", uppercase)
-    return _WHITESPACE.sub(" ", without_punctuation).strip()
+    return _WHITESPACE.sub(" ", without_punctuation).strip()[
+        :MAX_NORMALIZED_MERCHANT_LENGTH
+    ]
 
 
 def normalize_regex_pattern(pattern: str) -> str:

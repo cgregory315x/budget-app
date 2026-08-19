@@ -87,6 +87,9 @@ add suggestions for unresolved items, but they must remain behind explicit user 
   does not log transaction descriptions, normalized merchant values, statement text, sensitive
   account metadata, rule patterns, or preview payloads.
 - No AI provider, credentials, prompt construction, or provider logging exists in this slice.
+- Adversarial transaction descriptions are treated only as data. Integration tests cover
+  prompt-like text, control characters, unusual Unicode, bounded normalization, regex complexity,
+  and the absence of descriptions or sensitive account labels from application logs.
 
 ## Future deployment
 

@@ -36,7 +36,8 @@
 - [Complete] Transaction categorization provenance for manual and merchant-rule assignments.
 - [Complete] Rule re-enabling and explainable conflict review.
 - [Complete] Scalable match review filters with stable corrections and selection.
-- Privacy and prompt-injection tests around statement descriptions.
+- [Complete] Deterministic end-to-end, privacy, adversarial-description, and regex-safety tests.
+- Provider-boundary privacy and prompt-injection tests alongside the future AI gateway.
 
 ## Milestone 4: Reporting polish
 

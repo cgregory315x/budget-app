@@ -37,6 +37,28 @@ class MerchantRulePatternError(Exception):
     pass
 
 
+_UNSAFE_REGEX_FEATURE = re.compile(
+    r"\\[1-9]|\(\?(?:[=!]|<[=!]|P=)|"
+    r"\([^)]*(?:[+*?]|\{\d+(?:,\d*)?\})[^)]*\)(?:[+*?]|\{)"
+)
+_REGEX_QUANTIFIER = re.compile(r"[+*?]|\{\d+(?:,\d*)?\}")
+
+
+def _validate_safe_regex(pattern: str) -> None:
+    if len(pattern) > 120:
+        raise MerchantRulePatternError("Regular expressions are limited to 120 characters")
+    if _UNSAFE_REGEX_FEATURE.search(pattern):
+        raise MerchantRulePatternError(
+            "Regular expression uses unsupported backtracking features"
+        )
+    if pattern.count("(") > 10 or len(_REGEX_QUANTIFIER.findall(pattern)) > 10:
+        raise MerchantRulePatternError("Regular expression is too complex")
+    try:
+        re.compile(pattern)
+    except re.error as error:
+        raise MerchantRulePatternError("Regular expression is invalid") from error
+
+
 @dataclass(frozen=True, slots=True)
 class Match:
     transaction: Transaction
@@ -58,10 +80,7 @@ def _normalized_pattern(pattern: str, match_type: RuleMatchType) -> str:
         else normalize_merchant(pattern)
     )
     if match_type == RuleMatchType.REGEX:
-        try:
-            re.compile(normalized)
-        except re.error as error:
-            raise MerchantRulePatternError("Regular expression is invalid") from error
+        _validate_safe_regex(normalized)
     return normalized
 
 

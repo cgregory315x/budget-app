@@ -23,9 +23,11 @@ Deleting an account also archives it rather than removing it. This preserves its
 Transaction descriptions remain exactly as confirmed or manually entered. A separate
 `merchant_normalized` value is used for matching: Unicode is converted conservatively to ASCII,
 letters are uppercased, punctuation becomes spaces, repeated whitespace collapses, and numbers
-are retained. Exact and contains rule patterns use the same normalization. Regular-expression
+are retained. The result is capped at the database's 200-character boundary. Exact and contains
+rule patterns use the same normalization. Regular-expression
 patterns preserve operators, are converted to ASCII uppercase, and run against the normalized
-merchant value; invalid expressions are rejected.
+merchant value. Regex patterns are limited to 120 characters and reject backreferences,
+lookarounds, nested quantifiers, and excessive grouping or quantifiers to bound backtracking risk.
 
 Rules can only be created or retargeted to active categories. Disabled rules and rules whose
 category was later archived do not match. Normalized pattern plus match type is unique. Priority

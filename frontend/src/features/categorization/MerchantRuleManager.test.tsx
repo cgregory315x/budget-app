@@ -126,6 +126,8 @@ describe('MerchantRuleManager', () => {
     const learnedRule = { ...rule, id: 'rule-2', pattern: 'ACME 42', match_type: 'exact', category_id: coffee.id }
     const fetchMock = vi.fn().mockResolvedValueOnce(json([rule])).mockResolvedValueOnce(json([category, coffee])).mockResolvedValueOnce(json({ matches: [match], unmatched_count: 2 })).mockResolvedValueOnce(json({ applied_count: 1, skipped_count: 0, learned_rule_count: 1 })).mockResolvedValueOnce(json([rule, learnedRule]))
     vi.stubGlobal('fetch', fetchMock); render(<MerchantRuleManager />)
+    const dataChanged = vi.fn()
+    window.addEventListener('budget-app:data-changed', dataChanged)
     await screen.findByText('Acme')
     fireEvent.click(screen.getByRole('button', { name: 'Preview matches' }))
     expect(await screen.findByText(/2 unmatched/)).toBeInTheDocument()
@@ -141,5 +143,10 @@ describe('MerchantRuleManager', () => {
         body: JSON.stringify({ decisions: [{ transaction_id: match.transaction_id, category_id: coffee.id, save_exact_rule: true }] }),
       }),
     ))
+    expect(dataChanged).toHaveBeenCalled()
+    expect((dataChanged.mock.calls[0][0] as CustomEvent<string[]>).detail).toEqual([
+      'transactions', 'summary',
+    ])
+    window.removeEventListener('budget-app:data-changed', dataChanged)
   })
 })

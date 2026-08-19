@@ -107,6 +107,19 @@ def test_rule_crud_normalizes_and_requires_active_category(db_session: Session) 
         merchant_rules.get_rule(db_session, rule.id)
 
 
+@pytest.mark.parametrize(
+    "pattern",
+    ["(A+)+$", r"(ACME)\1", "(?=ACME)ACME", "A" * 121],
+)
+def test_rejects_unsafe_or_overly_complex_regex(
+    db_session: Session, pattern: str
+) -> None:
+    groceries, _, _, _ = seed(db_session)
+
+    with pytest.raises(merchant_rules.MerchantRulePatternError):
+        make_rule(db_session, groceries, pattern=pattern, match_type="regex")
+
+
 def test_preview_precedence_and_apply_never_overwrite(db_session: Session) -> None:
     groceries, coffee, uncategorized, assigned = seed(db_session)
     broad = make_rule(db_session, coffee, pattern="Acme", priority=100)
