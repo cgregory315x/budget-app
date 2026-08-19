@@ -81,6 +81,8 @@ def test_rule_api_contract_is_registered() -> None:
     paths = create_app().openapi()["paths"]
     assert set(paths["/api/v1/merchant-rules"]) == {"get", "post"}
     assert set(paths["/api/v1/merchant-rules/{rule_id}"]) == {"patch", "delete"}
+    assert "/api/v1/merchant-rules/{rule_id}/enable" in paths
+    assert "/api/v1/merchant-rules/{rule_id}/disable" in paths
     assert "/api/v1/merchant-rules/matches/preview" in paths
     assert "/api/v1/merchant-rules/matches/apply" in paths
 
@@ -95,6 +97,7 @@ def test_rule_crud_normalizes_and_requires_active_category(db_session: Session) 
     )
     assert updated.priority == 10
     assert merchant_rules.disable_rule(db_session, rule.id).enabled is False
+    assert merchant_rules.enable_rule(db_session, rule.id).enabled is True
     groceries.archived = True
     db_session.commit()
     with pytest.raises(merchant_rules.MerchantRuleReferenceError):
@@ -119,7 +122,8 @@ def test_preview_precedence_and_apply_never_overwrite(db_session: Session) -> No
     assert len(matches) == 1
     assert matches[0].transaction.id == uncategorized.id
     assert matches[0].rule.id == winner.id
-    assert matches[0].competing_rule_ids == (broad.id,)
+    assert [rule.id for rule in matches[0].competing_rules] == [broad.id]
+    assert matches[0].conflict_explanation == "Exact match outranks contains."
 
     applied, skipped, learned = merchant_rules.apply_matches(
         db_session,

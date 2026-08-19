@@ -41,7 +41,8 @@ class MerchantRulePatternError(Exception):
 class Match:
     transaction: Transaction
     rule: MerchantRule
-    competing_rule_ids: tuple[uuid.UUID, ...]
+    competing_rules: tuple[MerchantRule, ...]
+    conflict_explanation: str | None
 
 
 def _active_category(session: Session, category_id: uuid.UUID) -> None:
@@ -120,6 +121,16 @@ def disable_rule(session: Session, rule_id: uuid.UUID) -> MerchantRule:
     return rule
 
 
+def enable_rule(session: Session, rule_id: uuid.UUID) -> MerchantRule:
+    rule = get_rule(session, rule_id)
+    _active_category(session, rule.category_id)
+    if not rule.enabled:
+        rule.enabled = True
+        session.commit()
+        session.refresh(rule)
+    return rule
+
+
 def delete_rule(session: Session, rule_id: uuid.UUID) -> None:
     rule = get_rule(session, rule_id)
     session.delete(rule)
@@ -144,6 +155,19 @@ def _specificity(rule: MerchantRule) -> tuple[int, int]:
         RuleMatchType.REGEX: 2,
     }
     return (match_rank[rule.match_type], -len(rule.pattern_normalized))
+
+
+def _conflict_explanation(winner: MerchantRule, runner_up: MerchantRule) -> str:
+    if winner.priority != runner_up.priority:
+        return (
+            f"Priority {winner.priority} wins over priority {runner_up.priority}; "
+            "lower numbers run first."
+        )
+    if winner.match_type != runner_up.match_type:
+        return f"{winner.match_type.value.title()} match outranks {runner_up.match_type.value}."
+    if len(winner.pattern_normalized) != len(runner_up.pattern_normalized):
+        return "The longer normalized pattern is more specific."
+    return "Creation time and rule ID provide the stable final tie-breaker."
 
 
 def preview_matches(session: Session) -> tuple[list[Match], int]:
@@ -171,7 +195,16 @@ def preview_matches(session: Session) -> tuple[list[Match], int]:
                 str(rule.id),
             )
         )
-        matches.append(Match(transaction, candidates[0], tuple(rule.id for rule in candidates[1:])))
+        winner = candidates[0]
+        competing = tuple(candidates[1:])
+        matches.append(
+            Match(
+                transaction,
+                winner,
+                competing,
+                _conflict_explanation(winner, competing[0]) if competing else None,
+            )
+        )
     return matches, unmatched
 
 

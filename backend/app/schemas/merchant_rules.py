@@ -65,6 +65,15 @@ class MerchantRuleResponse(BaseModel):
     updated_at: datetime
 
 
+class CompetingRulePreview(BaseModel):
+    rule_id: uuid.UUID
+    pattern: str
+    match_type: RuleMatchType
+    priority: int
+    category_id: uuid.UUID
+    category_name: str
+
+
 class RuleMatchPreview(BaseModel):
     transaction_id: uuid.UUID
     description: str
@@ -75,7 +84,8 @@ class RuleMatchPreview(BaseModel):
     rule_pattern: str
     category_id: uuid.UUID
     category_name: str
-    competing_rule_ids: list[uuid.UUID]
+    competing_rules: list[CompetingRulePreview]
+    conflict_explanation: str | None
 
 
 class RulePreviewResponse(BaseModel):

@@ -31,7 +31,9 @@ Rules can only be created or retargeted to active categories. Disabled rules and
 category was later archived do not match. Normalized pattern plus match type is unique. Priority
 uses a lower-number-wins convention; equal-priority conflicts resolve by match type (exact,
 contains, regular expression), longer pattern, older creation time, then rule ID. Preview exposes
-losing matches so the outcome remains explainable.
+losing matches, their target categories and priorities, and the decisive precedence reason so the
+outcome remains explainable. Disabled rules can be re-enabled only while their target category is
+active.
 
 Preview is read-only. Apply recalculates the preview and changes only explicitly selected,
 currently uncategorized transactions. A manual category assignment is never overwritten, including

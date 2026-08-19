@@ -58,7 +58,8 @@ The current Milestone 3 slice is local and deterministic:
 4. Lower numeric priority wins. At equal priority, exact beats contains, which beats regular
    expression; a longer normalized pattern then wins; creation time and rule ID are stable final
    tie-breakers.
-5. Preview returns the winner and any lower-precedence competing rule IDs. It writes nothing.
+5. Preview returns the winner, the lower-precedence rules with their category and priority, and a
+   concise explanation of the decisive tie-breaker. It writes nothing.
 6. Apply accepts the user's selected transaction IDs, recalculates winners, and skips any
    transaction categorized or no longer matched since preview.
 7. Each selected row carries an explicitly approved active category. The user may keep the

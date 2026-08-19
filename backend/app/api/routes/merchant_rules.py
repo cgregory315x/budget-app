@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.categorization.merchant import normalize_merchant
 from app.db.session import get_db_session
 from app.schemas.merchant_rules import (
+    CompetingRulePreview,
     MerchantRuleCreate,
     MerchantRuleResponse,
     MerchantRuleUpdate,
@@ -83,6 +84,17 @@ def disable(rule_id: uuid.UUID, session: SessionDependency) -> MerchantRuleRespo
     return MerchantRuleResponse.model_validate(rule)
 
 
+@router.post("/{rule_id}/enable", response_model=MerchantRuleResponse)
+def enable(rule_id: uuid.UUID, session: SessionDependency) -> MerchantRuleResponse:
+    try:
+        rule = merchant_rules.enable_rule(session, rule_id)
+    except merchant_rules.MerchantRuleNotFoundError as error:
+        raise _not_found() from error
+    except merchant_rules.MerchantRuleReferenceError as error:
+        raise _save_error(error) from error
+    return MerchantRuleResponse.model_validate(rule)
+
+
 @router.delete("/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(rule_id: uuid.UUID, session: SessionDependency) -> Response:
     try:
@@ -108,7 +120,18 @@ def preview(session: SessionDependency) -> RulePreviewResponse:
                 rule_pattern=match.rule.pattern,
                 category_id=match.rule.category_id,
                 category_name=match.rule.category.name,
-                competing_rule_ids=list(match.competing_rule_ids),
+                competing_rules=[
+                    CompetingRulePreview(
+                        rule_id=rule.id,
+                        pattern=rule.pattern,
+                        match_type=rule.match_type,
+                        priority=rule.priority,
+                        category_id=rule.category_id,
+                        category_name=rule.category.name,
+                    )
+                    for rule in match.competing_rules
+                ],
+                conflict_explanation=match.conflict_explanation,
             )
             for match in matches
         ],

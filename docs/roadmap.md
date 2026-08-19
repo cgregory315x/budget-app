@@ -34,6 +34,7 @@
 - External AI provider gateway for unresolved transactions.
 - [Complete] Deterministic approval, correction, and exact-rule learning flow.
 - [Complete] Transaction categorization provenance for manual and merchant-rule assignments.
+- [Complete] Rule re-enabling and explainable conflict review.
 - Privacy and prompt-injection tests around statement descriptions.
 
 ## Milestone 4: Reporting polish

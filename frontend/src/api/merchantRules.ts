@@ -22,7 +22,15 @@ export type RuleMatch = {
   rule_pattern: string
   category_id: string
   category_name: string
-  competing_rule_ids: string[]
+  competing_rules: Array<{
+    rule_id: string
+    pattern: string
+    match_type: MatchType
+    priority: number
+    category_id: string
+    category_name: string
+  }>
+  conflict_explanation: string | null
 }
 
 type Preview = { matches: RuleMatch[]; unmatched_count: number }
@@ -60,6 +68,8 @@ export const updateMerchantRule = (id: string, input: Partial<MerchantRuleInput>
   request<MerchantRule>(`/api/v1/merchant-rules/${id}`, json('PATCH', input))
 export const disableMerchantRule = (id: string) =>
   request<MerchantRule>(`/api/v1/merchant-rules/${id}/disable`, json('POST'))
+export const enableMerchantRule = (id: string) =>
+  request<MerchantRule>(`/api/v1/merchant-rules/${id}/enable`, json('POST'))
 export const deleteMerchantRule = (id: string) =>
   request<void>(`/api/v1/merchant-rules/${id}`, { method: 'DELETE' })
 export const previewMerchantMatches = () =>
