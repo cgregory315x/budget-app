@@ -11,6 +11,8 @@ from app.schemas.monthly_summary import (
     BudgetProgressSummary,
     CategorySpendingSummary,
     MonthlySummaryResponse,
+    MonthlyTrendPoint,
+    MonthlyTrendsResponse,
 )
 
 ZERO = Decimal("0.00")
@@ -20,6 +22,12 @@ UNCATEGORIZED_COLOR = "#A3AAA7"
 
 def _next_month(month: date) -> date:
     return month + timedelta(days=monthrange(month.year, month.month)[1])
+
+
+def _shift_month(month: date, offset: int) -> date:
+    month_index = month.year * 12 + month.month - 1 + offset
+    year, zero_based_month = divmod(month_index, 12)
+    return date(year, zero_based_month + 1, 1)
 
 
 def _percent(numerator: Decimal, denominator: Decimal) -> Decimal | None:
@@ -138,4 +146,26 @@ def build_monthly_summary(session: Session, month: date) -> MonthlySummaryRespon
         uncategorized_count=uncategorized_count,
         category_spending=category_spending,
         budget_progress=budget_progress,
+    )
+
+
+def build_monthly_trends(
+    session: Session, end_month: date, month_count: int
+) -> MonthlyTrendsResponse:
+    start_month = _shift_month(end_month, -(month_count - 1))
+    points: list[MonthlyTrendPoint] = []
+    for offset in range(month_count):
+        summary = build_monthly_summary(session, _shift_month(start_month, offset))
+        points.append(
+            MonthlyTrendPoint(
+                month=summary.month,
+                planned_income=summary.planned_income,
+                actual_inflows=summary.actual_inflows,
+                total_spending=summary.total_spending,
+            )
+        )
+    return MonthlyTrendsResponse(
+        start_month=start_month,
+        end_month=end_month,
+        months=points,
     )

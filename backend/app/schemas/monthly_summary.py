@@ -35,3 +35,16 @@ class MonthlySummaryResponse(BaseModel):
     uncategorized_count: int
     category_spending: list[CategorySpendingSummary]
     budget_progress: list[BudgetProgressSummary]
+
+
+class MonthlyTrendPoint(BaseModel):
+    month: date
+    planned_income: Decimal
+    actual_inflows: Decimal
+    total_spending: Decimal
+
+
+class MonthlyTrendsResponse(BaseModel):
+    start_month: date
+    end_month: date
+    months: list[MonthlyTrendPoint]

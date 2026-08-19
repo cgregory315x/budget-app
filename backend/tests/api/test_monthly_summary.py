@@ -14,7 +14,7 @@ from app.db.models import (
     Transaction,
 )
 from app.main import create_app
-from app.services.monthly_summary import build_monthly_summary
+from app.services.monthly_summary import build_monthly_summary, build_monthly_trends
 
 AUGUST = date(2026, 8, 1)
 
@@ -49,6 +49,13 @@ def test_monthly_summary_api_contract_is_registered() -> None:
     parameters = schema["paths"]["/api/v1/summary"]["get"]["parameters"]
     assert parameters[0]["name"] == "month"
     assert parameters[0]["required"] is True
+
+    trend_operation = schema["paths"]["/api/v1/summary/trends"]["get"]
+    trend_parameters = {parameter["name"]: parameter for parameter in trend_operation["parameters"]}
+    assert trend_parameters["end_month"]["required"] is True
+    assert trend_parameters["months"]["schema"]["default"] == 6
+    assert trend_parameters["months"]["schema"]["minimum"] == 2
+    assert trend_parameters["months"]["schema"]["maximum"] == 24
 
 
 def test_builds_monthly_totals_composition_and_budget_progress(
@@ -126,3 +133,88 @@ def test_zero_income_has_no_percentage(db_session: Session) -> None:
     assert summary.remaining_percent is None
     assert summary.category_spending == []
     assert summary.budget_progress == []
+
+
+def test_builds_ordered_monthly_trends_with_empty_months(db_session: Session) -> None:
+    account = Account(
+        name="Synthetic Checking",
+        institution="Example Credit Union",
+        account_type=AccountType.CHECKING,
+        currency="USD",
+    )
+    expense = Category(name="Synthetic Groceries", kind=CategoryKind.EXPENSE)
+    income_category = Category(name="Synthetic Income", kind=CategoryKind.INCOME)
+    transfer = Category(name="Synthetic Transfer", kind=CategoryKind.TRANSFER)
+    db_session.add_all((account, expense, income_category, transfer))
+    db_session.flush()
+
+    add_transaction(
+        db_session,
+        account,
+        amount="-125.50",
+        category=expense,
+        posted_date=date(2026, 7, 20),
+    )
+    add_transaction(
+        db_session,
+        account,
+        amount="900.00",
+        category=income_category,
+        posted_date=date(2026, 7, 15),
+    )
+    add_transaction(db_session, account, amount="-40.25", posted_date=date(2026, 8, 5))
+    add_transaction(
+        db_session,
+        account,
+        amount="-500.00",
+        category=transfer,
+        posted_date=date(2026, 8, 6),
+    )
+    add_transaction(
+        db_session,
+        account,
+        amount="-99.00",
+        category=expense,
+        posted_date=date(2026, 8, 7),
+        excluded=True,
+    )
+    db_session.add_all(
+        (
+            MonthlyIncome(
+                month=date(2026, 7, 1),
+                description="Synthetic July income",
+                amount=Decimal("1000.00"),
+            ),
+            MonthlyIncome(
+                month=AUGUST,
+                description="Synthetic August income",
+                amount=Decimal("1100.00"),
+            ),
+        )
+    )
+    db_session.commit()
+
+    trends = build_monthly_trends(db_session, AUGUST, 3)
+
+    assert trends.start_month == date(2026, 6, 1)
+    assert trends.end_month == AUGUST
+    assert [point.month for point in trends.months] == [
+        date(2026, 6, 1),
+        date(2026, 7, 1),
+        AUGUST,
+    ]
+    assert [point.planned_income for point in trends.months] == [
+        Decimal("0.00"),
+        Decimal("1000.00"),
+        Decimal("1100.00"),
+    ]
+    assert [point.actual_inflows for point in trends.months] == [
+        Decimal("0.00"),
+        Decimal("900.00"),
+        Decimal("0.00"),
+    ]
+    assert [point.total_spending for point in trends.months] == [
+        Decimal("0.00"),
+        Decimal("125.50"),
+        Decimal("40.25"),
+    ]
