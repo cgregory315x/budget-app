@@ -66,6 +66,9 @@ The current Milestone 3 slice is local and deterministic:
 8. The user may save an approval or correction as an exact rule for that normalized merchant.
    Existing exact rules are retargeted and re-enabled instead of duplicated. Transaction updates
    and learned-rule changes commit atomically.
+9. Transactions expose categorization provenance. Accepted rule suggestions reference the winning
+   rule; direct assignments and corrected suggestions are manual. A later category change clears
+   stale rule provenance without relabeling unrelated transaction edits.
 
 There is no history-based, AI, or autonomous fallback in this slice. A later Milestone 3 slice may
 add suggestions for unresolved items, but they must remain behind explicit user approval.

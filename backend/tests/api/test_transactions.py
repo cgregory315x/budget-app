@@ -6,7 +6,13 @@ import pytest
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.db.models import Account, AccountType, Category, CategoryKind
+from app.db.models import (
+    Account,
+    AccountType,
+    CategorizationSource,
+    Category,
+    CategoryKind,
+)
 from app.main import create_app
 from app.schemas.transactions import TransactionCreate, TransactionUpdate
 from app.services import transactions
@@ -64,6 +70,8 @@ def test_create_repeated_transactions_with_stable_occurrences(db_session: Sessio
 
     assert first.amount == Decimal("-42.15")
     assert first.merchant_normalized == "EXAMPLE MARKET"
+    assert first.categorization_source == CategorizationSource.MANUAL
+    assert first.categorization_rule_id is None
     assert (first.occurrence_index, second.occurrence_index) == (1, 2)
     assert first.fingerprint != second.fingerprint
 
@@ -126,6 +134,8 @@ def test_update_recalculates_fingerprint_and_allows_uncategorizing(
         ),
     )
     assert updated.category_id is None
+    assert updated.categorization_source is None
+    assert updated.categorization_rule_id is None
     assert updated.merchant_normalized == "DIFFERENT MERCHANT"
     assert updated.fingerprint != original_fingerprint
 

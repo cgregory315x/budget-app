@@ -7,7 +7,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.categorization.merchant import normalize_merchant, normalize_regex_pattern
-from app.db.models import Category, MerchantRule, RuleMatchType, Transaction
+from app.db.models import (
+    CategorizationSource,
+    Category,
+    MerchantRule,
+    RuleMatchType,
+    Transaction,
+)
 from app.schemas.merchant_rules import (
     MerchantRuleCreate,
     MerchantRuleUpdate,
@@ -214,6 +220,12 @@ def apply_matches(
             continue
         match.transaction.category_id = decision.category_id
         match.transaction.categorization_confidence = None
+        if decision.category_id == match.rule.category_id:
+            match.transaction.categorization_source = CategorizationSource.MERCHANT_RULE
+            match.transaction.categorization_rule_id = match.rule.id
+        else:
+            match.transaction.categorization_source = CategorizationSource.MANUAL
+            match.transaction.categorization_rule_id = None
         if decision.save_exact_rule:
             merchant = match.transaction.merchant_normalized or normalize_merchant(
                 match.transaction.description

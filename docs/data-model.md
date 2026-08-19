@@ -43,6 +43,13 @@ normalized merchant. If that exact rule already exists, learning retargets and r
 otherwise it creates a priority-100 exact rule. The assignment and learned rule are one atomic
 operation. Archived correction categories and stale matches are skipped without changing data.
 
+Categorized transactions record how their current category was chosen. Direct transaction entry,
+manual edits, and corrections use the `manual` source. An approved unchanged rule suggestion uses
+the `merchant_rule` source and retains the winning rule ID. Clearing a category clears both fields.
+Deleting the originating rule clears the optional rule ID while preserving the source label and
+assigned category. Existing categorized transactions are backfilled as manual because their earlier
+origin cannot be inferred safely.
+
 ## Money conventions
 
 - Persist money as fixed-precision numeric values with two fractional digits for USD-facing fields.

@@ -345,6 +345,13 @@ export function TransactionManager() {
                     <span className="transaction-category">
                       {category && <i style={{ backgroundColor: category.color }} />}
                       {category?.name ?? 'Uncategorized'}
+                      {transaction.categorization_source && (
+                        <small className={`provenance-badge ${transaction.categorization_source}`}>
+                          {transaction.categorization_source === 'merchant_rule'
+                            ? 'Merchant rule'
+                            : 'Manual'}
+                        </small>
+                      )}
                     </span>
                     <strong className={Number(transaction.amount) < 0 ? 'amount-out' : 'amount-in'}>
                       {formatAmount(transaction)}

@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.categorization.merchant import normalize_merchant
-from app.db.models import Account, Category, Transaction
+from app.db.models import Account, CategorizationSource, Category, Transaction
 from app.schemas.transactions import TransactionCreate, TransactionUpdate
 
 
@@ -164,7 +164,15 @@ def _commit(session: Session, transaction: Transaction) -> Transaction:
 def create_transaction(session: Session, data: TransactionCreate) -> Transaction:
     _validate_account(session, data.account_id)
     _validate_category(session, data.category_id)
-    transaction = Transaction(**data.model_dump(), fingerprint="", occurrence_index=1)
+    transaction = Transaction(
+        **data.model_dump(),
+        fingerprint="",
+        occurrence_index=1,
+        categorization_source=(
+            CategorizationSource.MANUAL if data.category_id is not None else None
+        ),
+        categorization_rule_id=None,
+    )
     session.add(transaction)
     _set_fingerprint(session, transaction)
     return _commit(session, transaction)
@@ -175,6 +183,7 @@ def update_transaction(
 ) -> Transaction:
     transaction = get_transaction(session, transaction_id)
     changes = data.model_dump(exclude_unset=True)
+    previous_category_id = transaction.category_id
     if "account_id" in changes:
         _validate_account(session, changes["account_id"])
     if "category_id" in changes:
@@ -182,6 +191,13 @@ def update_transaction(
     fingerprint_fields = {"account_id", "posted_date", "description", "amount"}
     for field, value in changes.items():
         setattr(transaction, field, value)
+    if "category_id" in changes:
+        if changes["category_id"] is None:
+            transaction.categorization_source = None
+            transaction.categorization_rule_id = None
+        elif changes["category_id"] != previous_category_id:
+            transaction.categorization_source = CategorizationSource.MANUAL
+            transaction.categorization_rule_id = None
     if fingerprint_fields & changes.keys():
         _set_fingerprint(session, transaction)
     return _commit(session, transaction)

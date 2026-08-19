@@ -2,6 +2,8 @@ export type Transaction = {
   id: string
   account_id: string
   category_id: string | null
+  categorization_source: 'manual' | 'merchant_rule' | null
+  categorization_rule_id: string | null
   posted_date: string
   description: string
   amount: string

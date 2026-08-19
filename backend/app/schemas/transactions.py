@@ -5,6 +5,8 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.db.models import CategorizationSource
+
 
 class TransactionCreate(BaseModel):
     account_id: uuid.UUID
@@ -78,6 +80,8 @@ class TransactionResponse(BaseModel):
     id: uuid.UUID
     account_id: uuid.UUID
     category_id: uuid.UUID | None
+    categorization_source: CategorizationSource | None
+    categorization_rule_id: uuid.UUID | None
     posted_date: date
     description: str
     amount: Decimal

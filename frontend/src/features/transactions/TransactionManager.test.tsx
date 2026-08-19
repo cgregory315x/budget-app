@@ -30,6 +30,8 @@ const transaction = {
   id: 'f61ae2fd-013b-45cb-97f3-8de6dbabddad',
   account_id: account.id,
   category_id: category.id,
+  categorization_source: 'merchant_rule',
+  categorization_rule_id: 'b834222b-672a-477b-af84-0fd1ad437aad',
   posted_date: '2026-08-14',
   description: 'Example Market',
   amount: '-42.15',
@@ -66,6 +68,7 @@ describe('TransactionManager', () => {
     expect(await screen.findByText('Example Market')).toBeInTheDocument()
     expect(screen.getAllByText('Synthetic Groceries')).toHaveLength(3)
     expect(screen.getByText('-$42.15')).toBeInTheDocument()
+    expect(screen.getByText('Merchant rule')).toBeInTheDocument()
   })
 
   it('creates a manual transaction and refreshes the ledger', async () => {

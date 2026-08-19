@@ -54,6 +54,11 @@ class RuleMatchType(enum.StrEnum):
     REGEX = "regex"
 
 
+class CategorizationSource(enum.StrEnum):
+    MANUAL = "manual"
+    MERCHANT_RULE = "merchant_rule"
+
+
 class Account(TimestampMixin, Base):
     __tablename__ = "accounts"
 
@@ -122,6 +127,12 @@ class Transaction(TimestampMixin, Base):
     occurrence_index: Mapped[int] = mapped_column(Integer, default=1)
     excluded_from_budget: Mapped[bool] = mapped_column(Boolean, default=False)
     categorization_confidence: Mapped[Decimal | None] = mapped_column(Numeric(4, 3))
+    categorization_source: Mapped[CategorizationSource | None] = mapped_column(
+        Enum(CategorizationSource, native_enum=False)
+    )
+    categorization_rule_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("merchant_rules.id", ondelete="SET NULL")
+    )
 
     account: Mapped[Account] = relationship(back_populates="transactions")
     category: Mapped[Category | None] = relationship(back_populates="transactions")

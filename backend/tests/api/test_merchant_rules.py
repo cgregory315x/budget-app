@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.db.models import (
     Account,
     AccountType,
+    CategorizationSource,
     Category,
     CategoryKind,
     MerchantRule,
@@ -137,6 +138,8 @@ def test_preview_precedence_and_apply_never_overwrite(db_session: Session) -> No
     db_session.refresh(uncategorized)
     db_session.refresh(assigned)
     assert uncategorized.category_id == groceries.id
+    assert uncategorized.categorization_source == CategorizationSource.MERCHANT_RULE
+    assert uncategorized.categorization_rule_id == winner.id
     assert assigned.category_id == coffee.id
 
 
@@ -166,6 +169,8 @@ def test_correction_can_learn_and_refine_exact_rule(db_session: Session) -> None
     assert result == (1, 0, 1)
     db_session.refresh(uncategorized)
     assert uncategorized.category_id == coffee.id
+    assert uncategorized.categorization_source == CategorizationSource.MANUAL
+    assert uncategorized.categorization_rule_id is None
     exact = db_session.query(MerchantRule).filter_by(
         pattern_normalized="ACME MARKET 42",
         match_type=RuleMatchType.EXACT,
