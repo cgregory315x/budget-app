@@ -2,6 +2,8 @@ import asyncio
 import os
 import tempfile
 import uuid
+from datetime import date
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, BinaryIO, cast
 
@@ -64,17 +66,76 @@ def test_import_preview_api_contract_is_registered() -> None:
 
 def test_extracts_selectable_text_and_identifies_adapter(db_session: Session) -> None:
     account_id = create_test_account(db_session)
-    pdf = selectable_text_pdf("NAVY FEDERAL CREDIT UNION Synthetic Checking Statement")
+    pdf = selectable_text_pdf(
+        """NAVY FEDERAL CREDIT UNION
+Checking Account XXXX 1234
+Statement Period: 08/01/2026 - 08/31/2026
+Transactions
+08/02/2026 SYNTHETIC MARKET PURCHASE -$45.67
+Ending Balance $1,000.00"""
+    )
 
     result = preview(db_session, account_id, upload(pdf))
 
     assert result.account_id == account_id
     assert result.adapter == "navy_federal_checking_v1"
-    assert "Synthetic Checking Statement" in result.extracted_text
+    assert "SYNTHETIC MARKET PURCHASE" in result.extracted_text
     assert result.statement.filename == "synthetic-statement.pdf"
     assert result.statement.size_bytes == len(pdf)
     assert result.statement.page_count == 1
     assert result.statement.text_character_count == len(result.extracted_text)
+    assert result.parsed_statement.account_hint == "…1234"
+    assert result.parsed_statement.period_start == date(2026, 8, 1)
+    assert result.parsed_statement.transactions[0].amount == Decimal("-45.67")
+
+
+def test_returns_extracted_text_when_transaction_layout_is_not_supported(
+    db_session: Session,
+) -> None:
+    account_id = create_test_account(db_session)
+    pdf = selectable_text_pdf(
+        "NAVY FEDERAL CREDIT UNION\nChecking\nSynthetic statement layout not yet supported"
+    )
+
+    result = preview(db_session, account_id, upload(pdf))
+
+    assert "Synthetic statement layout" in result.extracted_text
+    assert result.parsed_statement.transactions == []
+    assert result.parsed_statement.warnings == [
+        "Transaction parser needs review: No supported transaction rows were found"
+    ]
+
+
+def test_previews_credit_card_statement_for_active_credit_card_account(
+    db_session: Session,
+) -> None:
+    account_id = create_test_account(db_session, account_type=AccountType.CREDIT_CARD)
+    pdf = selectable_text_pdf(
+        """NAVY FEDERAL CREDIT UNION
+CREDIT CARD xxxx xxxx xxxx 1234
+TRANSACTIONS
+Trans Date Post Date Reference No. Description Amount
+08/02/26 08/03/26 12345678901234567890123 SYNTHETIC MARKET $45.67
+TOTAL New Activity $45.67"""
+    )
+
+    result = preview(db_session, account_id, upload(pdf))
+
+    assert result.adapter == "navy_federal_credit_card_v1"
+    assert result.parsed_statement.account_hint == "…1234"
+    assert result.parsed_statement.transactions[0].amount == Decimal("-45.67")
+
+
+def test_rejects_credit_card_statement_for_checking_account(db_session: Session) -> None:
+    account_id = create_test_account(db_session)
+    pdf = selectable_text_pdf(
+        """NAVY FEDERAL CREDIT UNION
+Trans Date Post Date Reference No. Description Amount
+08/02/26 08/03/26 123456789012 SYNTHETIC MARKET $45.67"""
+    )
+
+    with pytest.raises(statement_imports.IneligibleAccountError, match="credit card account"):
+        preview(db_session, account_id, upload(pdf))
 
 
 def test_temporary_pdf_is_deleted_even_when_adapter_is_unsupported(
@@ -128,7 +189,16 @@ def test_requires_active_checking_account(
     account_id = create_test_account(db_session, account_type=account_type)
     with pytest.raises(statement_imports.IneligibleAccountError):
         preview(
-            db_session, account_id, upload(selectable_text_pdf("NAVY FEDERAL CREDIT UNION"))
+            db_session,
+            account_id,
+            upload(
+                selectable_text_pdf(
+                    """NAVY FEDERAL CREDIT UNION
+Checking
+Transactions
+08/02/2026 SYNTHETIC PURCHASE -1.00"""
+                )
+            ),
         )
 
 

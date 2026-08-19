@@ -8,7 +8,24 @@ export type StatementImportPreview = {
     page_count: number
     text_character_count: number
   }
+  parsed_statement: {
+    institution: string
+    account_hint: string | null
+    period_start: string | null
+    period_end: string | null
+    warnings: string[]
+    transactions: CandidateTransactionPreview[]
+  }
   extracted_text: string
+}
+
+export type CandidateTransactionPreview = {
+  posted_date: string
+  description: string
+  amount: string
+  source_text: string
+  confidence: string
+  warnings: string[]
 }
 
 type ApiErrorBody = { detail?: string }

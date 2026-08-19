@@ -3,6 +3,8 @@ from datetime import date
 from decimal import Decimal
 from typing import Protocol
 
+from app.db.models import AccountType
+
 
 @dataclass(frozen=True, slots=True)
 class CandidateTransaction:
@@ -26,6 +28,7 @@ class ParsedStatement:
 
 class StatementAdapter(Protocol):
     name: str
+    account_type: AccountType
 
     def can_parse(self, statement_text: str) -> bool: ...
 
@@ -38,4 +41,3 @@ class UnsupportedStatementError(ValueError):
 
 class StatementParseError(ValueError):
     """Raised when a recognized statement cannot be parsed safely."""
-

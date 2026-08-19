@@ -2,7 +2,7 @@
 
 A private, single-user budgeting application for importing financial statements, reviewing and categorizing transactions, setting monthly category limits, and understanding spending through clear visual summaries.
 
-The initial supported statement format is selectable-text Navy Federal Credit Union checking statements. The import design is adapter-based so support for additional institutions can be added later.
+The initial supported statement formats are selectable-text Navy Federal Credit Union checking and credit-card statements. The import design is adapter-based so support for additional institutions can be added later.
 
 ## Current status
 
@@ -10,9 +10,9 @@ The repository contains the product plan, a migrated domain schema, a FastAPI se
 
 ## Statement preview API
 
-`POST /api/v1/imports/preview` accepts `multipart/form-data` with an `account_id` field and one `file`. The account must be an active checking account and the file must be an `application/pdf` upload with a PDF signature, no larger than 10 MiB, and contain selectable text. The response returns the extracted text, PDF metadata, and the registered statement adapter name. It does not create an import record or transactions.
+`POST /api/v1/imports/preview` accepts `multipart/form-data` with an `account_id` field and one `file`. The account must be active and its type must match the identified statement adapter: checking for checking statements or credit card for credit-card statements. The file must be an `application/pdf` upload with a PDF signature, no larger than 10 MiB, and contain selectable text. The response returns the extracted text, PDF metadata, and the registered statement adapter name. It does not create an import record or transactions.
 
-The upload limit can be changed with `STATEMENT_UPLOAD_MAX_BYTES`. Uploaded PDFs are held only in a temporary file and that file is deleted after every success or failure.
+The upload limit can be changed with `STATEMENT_UPLOAD_MAX_BYTES`. Uploaded PDFs are held only in a temporary file and that file is deleted after every success or failure. Recognized Navy Federal statements return their statement period, masked account hint, editable candidate transactions, confidence, and row-level warnings. If extraction succeeds but the transaction layout is not recognized, the API still returns the extracted-text preview with a parser warning and no candidates. Preview edits remain client-side and no transactions are created yet.
 
 ## Stack
 

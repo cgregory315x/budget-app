@@ -60,7 +60,7 @@ Budget App helps one person turn financial statements into an accurate monthly v
 
 ## Later milestones
 
-- Credit-card and additional institution statement adapters.
+- Additional credit-card and institution statement adapters beyond Navy Federal.
 - Loan payment and balance history.
 - Interest and payoff projections.
 - Snowball, avalanche, and custom debt-payoff scenarios.
@@ -93,4 +93,3 @@ Budget App helps one person turn financial statements into an accurate monthly v
 - Previously learned merchant rules are applied consistently.
 - The user can understand monthly spending against category limits and income at a glance.
 - Reimporting the same statement produces a duplicate warning rather than duplicate data.
-

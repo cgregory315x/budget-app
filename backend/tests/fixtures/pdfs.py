@@ -1,7 +1,11 @@
 def selectable_text_pdf(text: str) -> bytes:
     """Build a small single-page PDF without any real statement data."""
-    escaped = text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
-    stream = f"BT /F1 12 Tf 72 720 Td ({escaped}) Tj ET".encode()
+    escaped_lines = [
+        line.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+        for line in text.splitlines()
+    ]
+    text_commands = " 0 -16 Td ".join(f"({line}) Tj" for line in escaped_lines)
+    stream = f"BT /F1 12 Tf 72 750 Td {text_commands} ET".encode()
     objects = [
         b"<< /Type /Catalog /Pages 2 0 R >>",
         b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",

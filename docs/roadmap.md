@@ -19,9 +19,10 @@
 
 - [Started] Temporary PDF upload with limits and cleanup.
 - [Started] Text extraction preview and adapter identification boundary.
-- Selectable-text Navy Federal checking adapter.
-- Parser fixtures made from synthetic/redacted samples.
-- Import preview with row-level warnings and editing.
+- [Started] Selectable-text Navy Federal checking adapter.
+- [Started] Selectable-text Navy Federal credit-card adapter.
+- [Started] Parser fixtures made from synthetic/redacted samples.
+- [Started] Import preview with row-level warnings and editing.
 - Statement and transaction duplicate detection.
 
 ## Milestone 3: Assisted categorization
@@ -48,7 +49,7 @@
 
 ## Milestone 6: Expansion
 
-- Credit-card statement adapters.
+- Additional credit-card statement adapters.
 - Additional institutions.
 - Hosted deployment and authentication decision.
 - Bank synchronization provider evaluation.

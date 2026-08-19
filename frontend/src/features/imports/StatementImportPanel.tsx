@@ -1,13 +1,19 @@
 import { FormEvent, useEffect, useState } from 'react'
 
 import { Account, listAccounts } from '../../api/accounts'
-import { StatementImportPreview, previewStatement } from '../../api/imports'
+import { CandidateTransactionPreview, StatementImportPreview, previewStatement } from '../../api/imports'
+
+function displayPeriod(preview: StatementImportPreview) {
+  const { period_start: start, period_end: end } = preview.parsed_statement
+  return start && end ? `${start} to ${end}` : 'Period unavailable'
+}
 
 export function StatementImportPanel() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [accountId, setAccountId] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<StatementImportPreview | null>(null)
+  const [candidates, setCandidates] = useState<CandidateTransactionPreview[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -17,9 +23,11 @@ export function StatementImportPanel() {
     listAccounts()
       .then((result) => {
         if (!active) return
-        const checking = result.filter((account) => account.account_type === 'checking')
-        setAccounts(checking)
-        setAccountId(checking[0]?.id ?? '')
+        const supported = result.filter((account) =>
+          account.account_type === 'checking' || account.account_type === 'credit_card',
+        )
+        setAccounts(supported)
+        setAccountId(supported[0]?.id ?? '')
       })
       .catch((reason: unknown) => {
         if (active) setError(reason instanceof Error ? reason.message : 'Accounts could not be loaded.')
@@ -39,12 +47,20 @@ export function StatementImportPanel() {
     setError(null)
     setPreview(null)
     try {
-      setPreview(await previewStatement(accountId, file))
+      const result = await previewStatement(accountId, file)
+      setPreview(result)
+      setCandidates(result.parsed_statement.transactions)
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : 'The statement could not be previewed.')
     } finally {
       setUploading(false)
     }
+  }
+
+  function updateCandidate(index: number, field: 'posted_date' | 'description' | 'amount', value: string) {
+    setCandidates((current) => current.map((candidate, candidateIndex) =>
+      candidateIndex === index ? { ...candidate, [field]: value } : candidate,
+    ))
   }
 
   return (
@@ -54,22 +70,26 @@ export function StatementImportPanel() {
           <p className="eyebrow">Milestone 2</p>
           <h2 id="import-heading">Preview a statement</h2>
           <p className="panel-description">
-            Upload a selectable-text Navy Federal checking PDF. Previewing does not create transactions.
+            Upload a selectable-text Navy Federal checking or credit-card PDF. Previewing does not create transactions.
           </p>
         </div>
       </div>
 
       <form className="import-form" onSubmit={submit}>
         <label>
-          Checking account
+          Statement account
           <select
             required
             value={accountId}
             disabled={loading || accounts.length === 0}
             onChange={(event) => setAccountId(event.target.value)}
           >
-            {accounts.length === 0 && <option value="">No active checking accounts</option>}
-            {accounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}
+            {accounts.length === 0 && <option value="">No supported active accounts</option>}
+            {accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.name} ({account.account_type.replace('_', ' ')})
+              </option>
+            ))}
           </select>
         </label>
         <label>
@@ -93,8 +113,66 @@ export function StatementImportPanel() {
             <strong>{preview.statement.filename}</strong>
             <span>{preview.statement.page_count} page · {preview.statement.text_character_count} text characters</span>
             <span>Adapter: {preview.adapter}</span>
+            <span>{preview.parsed_statement.institution}</span>
+            <span>{displayPeriod(preview)}</span>
+            {preview.parsed_statement.account_hint && (
+              <span>Account {preview.parsed_statement.account_hint}</span>
+            )}
           </div>
-          <pre>{preview.extracted_text}</pre>
+          {preview.parsed_statement.warnings.length > 0 && (
+            <ul className="import-warnings" aria-label="Statement warnings">
+              {preview.parsed_statement.warnings.map((warning) => <li key={warning}>{warning}</li>)}
+            </ul>
+          )}
+          <div className="candidate-table-wrap">
+            {candidates.length === 0 ? (
+              <p className="empty-state">
+                No transaction rows were recognized. Review the extracted text below.
+              </p>
+            ) : <table className="candidate-table">
+              <thead>
+                <tr><th>Date</th><th>Description</th><th>Amount</th><th>Review</th></tr>
+              </thead>
+              <tbody>
+                {candidates.map((candidate, index) => (
+                  <tr key={`${candidate.source_text}-${index}`}>
+                    <td>
+                      <input
+                        aria-label={`Transaction ${index + 1} date`}
+                        type="date"
+                        value={candidate.posted_date}
+                        onChange={(event) => updateCandidate(index, 'posted_date', event.target.value)}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        aria-label={`Transaction ${index + 1} description`}
+                        value={candidate.description}
+                        onChange={(event) => updateCandidate(index, 'description', event.target.value)}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        aria-label={`Transaction ${index + 1} amount`}
+                        inputMode="decimal"
+                        value={candidate.amount}
+                        onChange={(event) => updateCandidate(index, 'amount', event.target.value)}
+                      />
+                    </td>
+                    <td className={candidate.warnings.length > 0 ? 'candidate-warning' : ''}>
+                      {candidate.warnings.length > 0
+                        ? candidate.warnings.join(' · ')
+                        : `${Math.round(Number(candidate.confidence) * 100)}% confidence`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>}
+          </div>
+          <details open={candidates.length === 0}>
+            <summary>View extracted statement text</summary>
+            <pre>{preview.extracted_text}</pre>
+          </details>
           <p className="preview-note">Preview only — no transactions were created.</p>
         </div>
       )}

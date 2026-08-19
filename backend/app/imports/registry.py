@@ -1,9 +1,13 @@
 from collections.abc import Iterable
 
 from app.imports.adapters.navy_federal import NavyFederalCheckingAdapter
+from app.imports.adapters.navy_federal_credit_card import NavyFederalCreditCardAdapter
 from app.imports.types import StatementAdapter, UnsupportedStatementError
 
-DEFAULT_ADAPTERS: tuple[StatementAdapter, ...] = (NavyFederalCheckingAdapter(),)
+DEFAULT_ADAPTERS: tuple[StatementAdapter, ...] = (
+    NavyFederalCreditCardAdapter(),
+    NavyFederalCheckingAdapter(),
+)
 
 
 def identify_adapter(
@@ -15,4 +19,3 @@ def identify_adapter(
             return adapter
 
     raise UnsupportedStatementError("No supported statement format was recognized")
-
