@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { AccountManager } from './features/accounts/AccountManager'
 import { CategoryManager } from './features/categories/CategoryManager'
+import { MerchantRuleManager } from './features/categorization/MerchantRuleManager'
 import { StatementImportPanel } from './features/imports/StatementImportPanel'
 import { MonthlyPlanManager } from './features/planning/MonthlyPlanManager'
 import { MonthlySummaryDashboard } from './features/summary/MonthlySummaryDashboard'
@@ -49,6 +50,9 @@ function App() {
           <a className="nav-item" href="#categories">
             <span aria-hidden="true">◇</span> Categories
           </a>
+          <a className="nav-item" href="#merchant-rules">
+            <span aria-hidden="true">✦</span> Merchant rules
+          </a>
           <a className="nav-item" href="#accounts">
             <span aria-hidden="true">▤</span> Accounts
           </a>
@@ -82,6 +86,7 @@ function App() {
 
         <MonthlyPlanManager />
         <TransactionManager />
+        <MerchantRuleManager />
         <AccountManager />
         <CategoryManager />
       </main>

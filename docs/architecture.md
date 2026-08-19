@@ -50,13 +50,20 @@ The first adapter targets selectable-text Navy Federal checking statements. Raw 
 
 ## Categorization order
 
-1. User-defined exact or normalized merchant rules.
-2. Existing transaction/category history.
-3. External AI suggestion for unresolved items.
-4. User approval or correction.
-5. Optional creation or update of a deterministic rule.
+The current Milestone 3 slice is local and deterministic:
 
-AI output is always treated as a suggestion. The provider gateway must return a category identifier, confidence, and short rationale using only the categories supplied by the application.
+1. Only enabled rules whose target category is active are considered.
+2. Only transactions with no category are eligible.
+3. Rules match the stored normalized merchant value without changing the original description.
+4. Lower numeric priority wins. At equal priority, exact beats contains, which beats regular
+   expression; a longer normalized pattern then wins; creation time and rule ID are stable final
+   tie-breakers.
+5. Preview returns the winner and any lower-precedence competing rule IDs. It writes nothing.
+6. Apply accepts the user's selected transaction IDs, recalculates winners, and skips any
+   transaction categorized or no longer matched since preview.
+
+There is no history-based, AI, or autonomous fallback in this slice. A later Milestone 3 slice may
+add suggestions for unresolved items, but they must remain behind explicit user approval.
 
 ## Security boundary
 
@@ -64,7 +71,10 @@ AI output is always treated as a suggestion. The provider gateway must return a 
 - Temporary storage uses generated names outside publicly served directories.
 - Successful, cancelled, and expired imports trigger cleanup.
 - Logs contain import identifiers and status, not statement text or account data.
-- AI requests omit personally identifying statement metadata.
+- Merchant matching runs inside the application and database. It makes no external request and
+  does not log transaction descriptions, normalized merchant values, statement text, sensitive
+  account metadata, rule patterns, or preview payloads.
+- No AI provider, credentials, prompt construction, or provider logging exists in this slice.
 
 ## Future deployment
 

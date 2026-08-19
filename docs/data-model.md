@@ -18,6 +18,25 @@ Category names are unique without regard to letter case, while preserving the us
 
 Deleting an account also archives it rather than removing it. This preserves its future transaction, statement-import, and loan history. A current balance is optional because an account may be created before a statement or manual balance is available.
 
+## Merchant matching
+
+Transaction descriptions remain exactly as confirmed or manually entered. A separate
+`merchant_normalized` value is used for matching: Unicode is converted conservatively to ASCII,
+letters are uppercased, punctuation becomes spaces, repeated whitespace collapses, and numbers
+are retained. Exact and contains rule patterns use the same normalization. Regular-expression
+patterns preserve operators, are converted to ASCII uppercase, and run against the normalized
+merchant value; invalid expressions are rejected.
+
+Rules can only be created or retargeted to active categories. Disabled rules and rules whose
+category was later archived do not match. Normalized pattern plus match type is unique. Priority
+uses a lower-number-wins convention; equal-priority conflicts resolve by match type (exact,
+contains, regular expression), longer pattern, older creation time, then rule ID. Preview exposes
+losing matches so the outcome remains explainable.
+
+Preview is read-only. Apply recalculates the preview and changes only explicitly selected,
+currently uncategorized transactions. A manual category assignment is never overwritten, including
+when it happens between preview and apply.
+
 ## Money conventions
 
 - Persist money as fixed-precision numeric values with two fractional digits for USD-facing fields.

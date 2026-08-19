@@ -18,3 +18,10 @@ def normalize_merchant(description: str) -> str:
     uppercase = ascii_description.upper()
     without_punctuation = _PUNCTUATION.sub(" ", uppercase)
     return _WHITESPACE.sub(" ", without_punctuation).strip()
+
+
+def normalize_regex_pattern(pattern: str) -> str:
+    """Align a regex with normalized merchants while preserving regex operators."""
+
+    ascii_pattern = unicodedata.normalize("NFKD", pattern).encode("ascii", "ignore").decode()
+    return _WHITESPACE.sub(" ", ascii_pattern.upper()).strip()

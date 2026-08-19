@@ -6,7 +6,7 @@ The initial supported statement formats are selectable-text Navy Federal Credit 
 
 ## Current status
 
-The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard. Milestone 2 is complete: selectable-text Navy Federal checking and credit-card statements can be safely previewed, reviewed, checked for duplicates, and explicitly confirmed through an atomic import workflow.
+The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard. Milestone 2 is complete: selectable-text Navy Federal checking and credit-card statements can be safely previewed, reviewed, checked for duplicates, and explicitly confirmed through an atomic import workflow. Milestone 3 has begun with local deterministic merchant rules and an explicit match preview/apply workflow; no external AI provider is connected.
 
 ## Statement import API
 

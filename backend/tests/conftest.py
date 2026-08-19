@@ -10,6 +10,7 @@ from app.db.base import Base
 from app.db.models import (
     Account,
     Category,
+    MerchantRule,
     MonthlyBudget,
     MonthlyIncome,
     StatementImport,
@@ -31,6 +32,7 @@ def db_session() -> Generator[Session]:
             cast(Table, Category.__table__),
             cast(Table, StatementImport.__table__),
             cast(Table, Transaction.__table__),
+            cast(Table, MerchantRule.__table__),
             cast(Table, MonthlyBudget.__table__),
             cast(Table, MonthlyIncome.__table__),
         ],

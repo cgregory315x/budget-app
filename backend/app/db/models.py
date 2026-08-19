@@ -132,10 +132,15 @@ class Transaction(TimestampMixin, Base):
 
 class MerchantRule(TimestampMixin, Base):
     __tablename__ = "merchant_rules"
-    __table_args__ = (UniqueConstraint("pattern", "match_type", name="uq_merchant_rule"),)
+    __table_args__ = (
+        UniqueConstraint("pattern_normalized", "match_type", name="uq_merchant_rule"),
+        CheckConstraint("priority >= 0", name="ck_merchant_rule_priority_nonnegative"),
+        Index("ix_merchant_rules_enabled_priority", "enabled", "priority"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     pattern: Mapped[str] = mapped_column(String(200))
+    pattern_normalized: Mapped[str] = mapped_column(String(200))
     match_type: Mapped[RuleMatchType] = mapped_column(Enum(RuleMatchType, native_enum=False))
     category_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("categories.id"))
     priority: Mapped[int] = mapped_column(Integer, default=100)
