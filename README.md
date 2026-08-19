@@ -6,7 +6,13 @@ The initial supported statement format is selectable-text Navy Federal Credit Un
 
 ## Current status
 
-The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard; the PDF import workflow is still in development.
+The repository contains the product plan, a migrated domain schema, a FastAPI service, and a React dashboard. Persistent accounts, categories, manual transactions, monthly category budgets, expected income, and a real monthly summary are available through the API and dashboard. Milestone 2 now includes a safe PDF text-extraction preview; transaction parsing and import confirmation remain in development.
+
+## Statement preview API
+
+`POST /api/v1/imports/preview` accepts `multipart/form-data` with an `account_id` field and one `file`. The account must be an active checking account and the file must be an `application/pdf` upload with a PDF signature, no larger than 10 MiB, and contain selectable text. The response returns the extracted text, PDF metadata, and the registered statement adapter name. It does not create an import record or transactions.
+
+The upload limit can be changed with `STATEMENT_UPLOAD_MAX_BYTES`. Uploaded PDFs are held only in a temporary file and that file is deleted after every success or failure.
 
 ## Stack
 

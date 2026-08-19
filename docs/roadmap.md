@@ -17,8 +17,8 @@
 
 ## Milestone 2: Navy Federal import
 
-- Temporary PDF upload with limits and cleanup.
-- Text extraction boundary.
+- [Started] Temporary PDF upload with limits and cleanup.
+- [Started] Text extraction preview and adapter identification boundary.
 - Selectable-text Navy Federal checking adapter.
 - Parser fixtures made from synthetic/redacted samples.
 - Import preview with row-level warnings and editing.
@@ -53,4 +53,3 @@
 - Hosted deployment and authentication decision.
 - Bank synchronization provider evaluation.
 - Mobile client or progressive web application improvements.
-

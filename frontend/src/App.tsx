@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { AccountManager } from './features/accounts/AccountManager'
 import { CategoryManager } from './features/categories/CategoryManager'
+import { StatementImportPanel } from './features/imports/StatementImportPanel'
 import { MonthlyPlanManager } from './features/planning/MonthlyPlanManager'
 import { MonthlySummaryDashboard } from './features/summary/MonthlySummaryDashboard'
 import { TransactionManager } from './features/transactions/TransactionManager'
@@ -71,11 +72,12 @@ function App() {
             <h1>Your monthly picture</h1>
             <p className="subtitle">Track what came in, what went out, and what needs attention.</p>
           </div>
-          <button className="primary-button" type="button">
+          <a className="primary-button" href="#imports">
             <span aria-hidden="true">↑</span> Import statement
-          </button>
+          </a>
         </header>
 
+        <StatementImportPanel />
         <MonthlySummaryDashboard />
 
         <MonthlyPlanManager />

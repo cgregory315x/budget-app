@@ -10,6 +10,7 @@ class Settings(BaseSettings):
         "postgresql+psycopg://budget_app:budget_app@localhost:5432/budget_app"
     )
     cors_origins: list[str] = ["http://localhost:5173"]
+    statement_upload_max_bytes: int = 10 * 1024 * 1024
     ai_api_key: str | None = None
 
 
@@ -19,4 +20,3 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-
